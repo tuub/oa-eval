@@ -1,0 +1,98 @@
+\clearpage
+\begin{appendices}
+\label{appendix}
+%\subsection*{Übersicht Skriptdateien}
+\begin{table}[h]
+\caption{Übersicht der einzelnen Skriptdateien}
+    \begin{tabularx}{1\textwidth}{p{5cm}p{9cm}}
+    \toprule
+     Skriptdatei & Erläuterung \\
+     \midrule
+cr.py & Abfragen der APIs von CrossRef und DOAJ \\
+graphics.py	& Visualisierung Ergebnisse\\
+main.py & Hauptskript\\
+    \bottomrule
+    \end{tabularx}
+%\caption{Übersicht der einzelnen Skriptdateien}
+\end{table}
+
+%\subsection*{Übersicht Eingabedateien}
+\begin{table}[h]
+\caption{Übersicht der vom Skript einzulesenden Dateien}
+    \begin{tabularx}{1\textwidth}{p{5cm}p{9cm}}
+    \toprule
+     Eingabedatei & Erläuterung \\
+     \midrule
+     docsChecked.txt & Publikationen, für die Affiliation der Erst- bzw. Korrespondenzautorschaft manuell geprüft wurde \\
+    doaj.txt & DOAJ-Metadaten \\
+    \midrule
+    bsc20xx.txt & Artikeldaten Business Source Complete \\
+    cab20xx.txt & Artikeldaten CAB Abstracts \\
+    cinahl20xx.txt & Artikeldaten CINHAL \\
+    ebsco20xx.txt & Artikeldaten Academic Search Premier (EBSCO) \\
+    embase20xx.txt & Artikeldaten Embase \\
+    gf20xx.txt & Artikeldaten GeoRef \\
+    ieee20xx.txt & Artikeldaten IEEE Xplore \\
+    inspec20xx.txt & Artikeldaten InSpec \\
+    lisa20xx.txt & Artikeldaten LISA \\
+    pq20xx.txt & Artikeldaten ProQuest Social Sciences \\
+    pubmed20xx.txt & Artikeldaten PubMed \\
+    scopus20xx.txt & Artikeldaten Scopus \\
+    sd20xx.txt & Artikeldaten Sport Discus \\
+    sf20xx.txt & Artikeldaten SciFinder \\
+    tema20xx.txt & Artikeldaten TEMA \\
+    wos20xx.txt & Artikeldaten Web of Science \\
+    \bottomrule
+    \end{tabularx}
+%\caption{Übersicht der vom Skript einzulesenden Dateien}
+\end{table}
+
+%\subsection*{Übersicht Skriptvariablen}
+\begin{table}[h]
+\caption{Übersicht der wichtigsten im Skript verwendeten Variablen}
+    \begin{tabularx}{1\textwidth}{p{5cm}p{9cm}}
+    \toprule
+     Variable im Skript & Erläuterung \\
+     \midrule
+checkToDo & Skriptfunktionalität (de-)aktivieren: manuelle Prüfung Erst-/Korrespondenzautorschaft\\
+contactCR & Skriptfunktionalität (de-)aktivieren: Abfragen der APIs von CrossRef und DOAJ \\
+doAnalysis & Skriptfunktionalität (de-)aktivieren: Datenauswertung (Statistik, Diagramme)\\
+doReadIn & Skriptfunktionalität (de-)aktivieren: Einlesen Artikeldaten aus Datenbankrecherchen\\
+finalList & Liste aller gefundenen Artikel\\
+hybrid &  Liste der OA-Artikel in Hybridzeitschriften\\
+oaList &  Liste der OA-Artikel in OA-Zeitschriften\\
+oaWoS & Liste der OA-Artikel, für die Korrespondenzautorschaft bei einer untersuchten Institution liegt\\
+    \bottomrule
+    \end{tabularx}
+%\caption{Übersicht der wichtigsten im Skript verwendeten Variablen}
+\end{table}
+
+%\subsection*{Übersicht Ausgabedateien}
+\begin{table}[h]
+\caption{Übersicht der vom Skript ausgegebenen Dateien}
+    \begin{tabularx}{1\textwidth}{p{5cm}p{9cm}}
+    \toprule
+     Ausgabedatei & Erläuterung \\
+     \midrule
+    allOAPubs.txt & Liste aller gefundenen OA-Artikel \\
+    allOAPubsWithCorrAuthor.txt & Liste aller OA-Artikel mit Autorin bzw. Autor der analysierten Einrichtung(en) als Erst- bzw. Korrespondenzautor \\
+    allPubs.txt & Liste aller gefundenen Artikel \\
+    CRResults & interne Arbeitsdatei der an CrossRef gesendeten Daten und den abgefragten Informationen \\
+    CRResults.txt & Liste der an CrossRef gesendeten DOIs und den abgefragten Informationen \\
+    CRResultsDOAJ & interne Arbeitsdatei der an DOAJ gesendeten Daten und den abgefragten Informationen \\
+    DOAJResults.txt & Liste aller ISSNs, die an die DOAJ-API geschickt wurden und den entsprechenden OA-Status der Zeitschrift \\
+    docstobechecked.txt & Liste der Publikationen, für die Affiliation der Erst- bzw. Korrespondenzautorschaft manuell zu prüfen ist \\
+    finalList & interne Arbeitsdatei aller Artikeldaten \\
+    hybridArticles.txt & Liste der OA-Artikel in Hybridzeitschriften \\
+    statistics\_OA.txt & Statistik der analysierten Artikel \\
+    statistics\_publishers.txt & Häufigkeitsverteilung der OA-Artikel auf Verlage \\
+    \midrule
+    Figure\_OAIncrease.png & Diagramm: Zuwachs an (OA-)Artikeln \\
+    Figure\_OANumbers.png & Diagramm: Statistik über analysierte (OA-)Artikel \\
+    Figure\_OAShare.png & Diagramm: Entwicklung des OA-Anteils \\
+    \bottomrule
+    \end{tabularx}
+%\caption{Übersicht der vom Skript ausgegebenen Dateien}
+\end{table}
+
+\end{appendices}
