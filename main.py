@@ -242,7 +242,7 @@ def askCR(missISSN):
 def askOaDOI(needInfo):
     print 'Begin contacting oaDOI'
     baseurl = 'https://api.oadoi.org/v2/'
-    eMail = '?email=e.bunge@deutsches-museum.de'
+    eMail = '?email=test@example.com'
     relKeys = {1:'is_oa', 2:'journal_is_oa', 3:'host_type', 4:'license',
                5:'publisher'}
     replies = [[0 for x in range(7)] for y in range(len(needInfo))]
