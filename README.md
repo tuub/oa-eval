@@ -8,7 +8,7 @@ The script DOES aggregate, normalise and duplicate check for article data. The s
 The script DOES NOT retrieve article data from databases -- this has to be done beforehand! Instructions for retrieval of article data are included in the (German) manual.
 
 ## How to
-See the manual further information on input/output files and the most important script variables.
+See the manual for further information on input/output files and the most important script variables.
 
 A full manual in German is available as [PDF file](/manual.pdf) and [LaTeX project](/manual-tex). See the manual for information on
 * how to retrieve article data from different databases (e.g. Web of Science, SciFinder, PubMed),
