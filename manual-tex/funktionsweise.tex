@@ -1,72 +1,73 @@
+% !TEX root = main.tex
 \section{Funktionsweise des Python-Skripts}
 \label{funktionsweise}
 \subsection{Aufbau und einzelne Funktionen}
-Das Skript ist in Python Version 2.7 geschrieben (zu Systemanforderungen vgl. Kap.~\ref{requirements} auf S.~\pageref{requirements}) und in drei Teilskripte gegliedert: \texttt{graphics.py} erzeugt die graphische Ausgabe der Ergebnisse. \texttt{cr.py} führt die Abfragen der \textit{CrossRef}- und \textit{DOAJ}-APIs durch. Das Kernstück des Skripts ist \texttt{main.py}, welches in zehn Teile gegliedert ist:
+Das Skript ist in Python Version 2.7 geschrieben (zu Systemanforderungen vgl. Kap.~\ref{requirements} auf S.~\pageref{requirements}) und besteht aus dem Skript (\texttt{main.py}) sowie einer Hilfsdatei (\texttt{RIS-fields.csv}). In der Hilfsdatei ist für diejenigen Datenbanken, deren Daten im RIS-Format verarbeitet werden, definiert, welche RIS-Felder eingelesen werden sollen. Das Skript selbst ist in zwölf Teile gegliedert:
 
 \paragraph{1. Funktionalitäten (de-) aktivieren}
-Verschiedene Funktionalitäten des Skripts können aktiviert bzw. deaktiviert werden, zum Beispiel die Abfrage der \textit{CrossRef}-API. Siehe die folgenden Punkte und Kap.~\ref{ownanalysis} für eine Erläuterung der Funktionalitäten.
+Verschiedene Funktionalitäten des Skripts können aktiviert bzw. deaktiviert werden, zum Beispiel die Abfrage der Schnittstellen von Crossref und Unpaywall. Zur Erhöhung der Genauigkeit können Parameter für den gewünschten Untersuchungszeitraum festgelegt werden. Siehe die folgenden Punkte und Kap.~\ref{ownanalysis} für eine Erläuterung der Funktionalitäten.
 
 \paragraph{2. Klassen und Funktionen} \label{func-def}
-Es werden die Eigenschaften der untersuchten Institutionen, Datenbanken und Publikationen festgelegt und Funktionen definiert, die später mehrfach benötigt werden: der Dublettenabgleich und die Normalisierung der verschiedenen Datenformate\footnote{Je nach Datenbank ist die ISSN unterschiedlich formatiert. Das Programm kann die folgenden Formatierungen verarbeiten: \texttt{1234-5678}, \texttt{12345678}, \texttt{ISSN 1234-5678} und \texttt{1234-5678, 9012-3456}. Bei der letzten Variante wird jedoch nur die erste ISSN erfasst.}.
+Es werden die Eigenschaften der untersuchten Institutionen, Datenbanken und Publikationen festgelegt und Funktionen definiert, die später mehrfach benötigt werden: der Dublettenabgleich, das Einlesen sowie die Normalisierung der verschiedenen Datenformate, die Abfragen der Schnittstellen von Crossref und Unpaywall sowie der Abgleich von Institutionsnamen.
 
 \paragraph{3. Institutionen ansetzen} \label{inst-def}
-Es wird festgelegt, welche Institutionen bei der Analyse berücksichtigt werden sollen. Es können beliebig viele Institutionen mit beliebig vielen Namensvarianten definiert werden. Im Skript sind mehrere Berliner Institutionen angelegt. Soll eine Institution nur kurzfristig von der Analyse ausgeschlossen werden, müssen alle Zeilen des jeweiligen Abschnitts ausgenommen werden, indem eine Raute (\texttt{\#}) an den Zeilenanfang gesetzt wird. Soll eine Institution dauerhaft von der Analyse ausgeschlossen werden, sind die jeweiligen Zeilen zu löschen. Neue Institutionen können nach dem vorhandenen Muster angelegt werden (siehe auch Kap.~\ref{newinst}  auf S.~\pageref{newinst}).
+Es wird festgelegt, welche Institutionen bei der Analyse berücksichtigt werden sollen. Es können beliebig viele Institutionen mit beliebig vielen Namensvarianten definiert werden. Im Skript sind exemplarisch mehrere Berliner Institutionen angelegt. Soll eine Institution nur kurzfristig von der Analyse ausgeschlossen werden, können alle Zeilen des jeweiligen Abschnitts ausgenommen werden, indem eine Raute (\texttt{\#}) an den Zeilenanfang gesetzt wird. Soll eine Institution dauerhaft von der Analyse ausgeschlossen werden, sind die jeweiligen Zeilen zu löschen. Neue Institutionen können nach dem vorhandenen Muster angelegt werden (siehe auch Kap.~\ref{newinst}  auf S.~\pageref{newinst}).
+
+Für Institutionen mit eher generischem Namen wird eine zweite Option zur Institutionserkennung angeboten: Es können verschiedene Namensvarianten hinterlegt, für die das Skript eine exakte Suche (d.\,h. exakter Zeichenabgleich) in den Daten durchführt. Die exakte Suche kommt dann zum Tragen, wenn alle Autorinnen und Autoren (nicht nur Korrespondenzautor/in) auf Affilitionszugehörigkeit untersucht werden und damit eine teils sehr große Anzahl von Institutionennamen gleichzeitig ausgewertet wird.
 
 \paragraph{4. Datenbanken ansetzen und Daten einlesen} \label{readinput}
-Es wird festgelegt, welche Datenbanken bei der Analyse verwendet werden. Jede Datenbank erhält einen Namen und eine Datenbank-ID. Diese ID-Nummer ist beliebig, muss aber eindeutig sein. Über diese ID kann in den Ausgabedateien nachvollzogen werden, welche Artikeldaten aus welcher Datenbank stammen.
+Es wird festgelegt, welche Datenbanken bei der Analyse verwendet werden. Jede Datenbank erhält einen Namen und eine Datenbank-ID.
 
-Aus den im Vorfeld erhobenen Daten werden die relevanten Informationen eingelesen, extrahiert und einheitlich strukturiert. Jede Publikation erhält dabei die folgenden Eigenschaften: Autorinnen und Autoren, Titel, DOI, Zeitschrift, ISSN, eISSN, Jahr, Affiliation, Korrespondenz- bzw. Erstautorschaft, E-Mail-Adresse, Fachgebiet laut Datenbank\footnote{Zurzeit nur \textit{Web of Science} und \textit{SciFinder}}, Angaben zu (Drittmittel-) Förderung\footnote{Zurzeit nur \textit{Web of Science}}, gefundene Namensvariante, Fachgebiet laut \textit{DOAJ}, Verlag, Lizenz, Anmerkungen und die Datenbank-ID der Datenbank, in der die Publikation gefunden wurde. Liegen keine Informationen zu einer Eigenschaft vor, so bleibt sie leer.
+Aus den im Vorfeld erhobenen Daten werden die relevanten Informationen eingelesen, extrahiert und einheitlich strukturiert. Jede Publikation erhält dabei die folgenden Eigenschaften: Autorinnen und Autoren, Titel, OA-Status, DOI, Zeitschrift, ISSN, eISSN, Verlag, Jahr, Affiliation, darin gefundene Namensvarianten, Korrespon\-denz- bzw. Erstautorschaft, darin gefundene Namensvariante, E-Mail-Adresse, Fachgebiet laut Datenbank\footnote{Zurzeit nur Web of Science und SciFinder}, Angaben zu (Drittmittel-) Förderung\footnote{Zurzeit nur Web of Science}, Fachgebiet laut DOAJ, Lizenz, Anmerkungen, die von Unpaywall gelieferten Daten zu diesem Artikel, Höhe der APC und deren Währung sowie die Datenbank, in der die Publikation gefunden wurde. Liegen keine Informationen zu einer Eigenschaft vor, so bleibt sie entweder leer oder es wird \texttt{None} als Wert eingetragen.
 
-\paragraph{5. Dublettenabgleich} Die Artikeldaten werden miteinander verglichen und Mehrfacheinträge eliminiert. Der Dublettenabgleich erfolgt in zwei Schritten: Es werden  zunächst vorhandene DOIs verglichen. Sind keine DOIs vorhanden, werden Angaben zu Autorin bzw. Autor und Titel abgeglichen, indem die ersten vier Konsonanten der Autorennamen und die ersten 20 Konsonanten des Titels zu einem String zusammengefügt und dann verglichen werden. Die dazugehörigen Statistiken werden ausgegeben.
+\paragraph{5. Dublettenabgleich} \label{func-duplicates} Die Artikeldaten werden miteinander verglichen und Mehrfacheinträge eliminiert. Der Dublettenabgleich erfolgt in zwei Schritten: Es werden  zunächst vorhandene DOIs verglichen. Sind keine DOIs vorhanden, werden Angaben zu Autorin bzw. Autor und Titel abgeglichen, indem die ersten drei Konsonanten der Autorennamen und die ersten 19 Konsonanten des Titels zu einem String zusammengefügt und dann verglichen werden. Die dazugehörigen Statistiken werden im Terminal ausgegeben.
 
-Nachdem der Dublettenabgleich durchgeführt wurde, werden die generierten Daten in einer Datei \texttt{finalList} abgespeichert. Um bei nochmaligen Start des Skripts Zeit zu sparen, kann im Anschluss mithilfe der Variable \texttt{doReadIn} die Funktion deaktiviert werden. Bei Skriptstart wird die Datei \texttt{finalList} eingelesen; nochmaliges Einlesen der Datenbankdaten und der Dublettenabgleich entfallen.
+Nachdem der Dublettenabgleich durchgeführt wurde, werden die generierten Daten in einer Datei \texttt{finalList} abgespeichert. Um bei einem nochmaligen Start des Skripts Zeit zu sparen, kann im Anschluss mithilfe der Variable \texttt{doReadIn} (s. Teil 1 des Skripts) bei Skriptstart die Datei \texttt{finalList} wieder eingelesen werden; nochmaliges Verarbeiten der Datenbankdaten und der Dublettenabgleich entfallen.
 
-\paragraph{6. DOAJ-Daten}
-Die relevanten Informationen aus dem \textit{DOAJ} werden eingelesen. Die ISSNs und eISSNs werden mit der Liste der gefundenen Publikationen abgeglichen. Die so gefundenen OA-Artikel in echten OA-Zeitschriften werden in einer Liste abgespeichert und mit Daten zu Fachgebiet, Verlag und Lizenz aus dem \textit{DOAJ} angereichert.
+\paragraph{6. Erst- bzw. Korrespondenzautorschaft} \label{func-corr-author}
+Es wird untersucht, welche Publikationen eine Autorin bzw. einen Autor der gesuchten Institution(en) als Erst- bzw. Korrespondenzautorin haben. Dazu werden die von den Datenbanken bereitgestellten Affiliationsangaben mit den in Abschnitt 3 des Skript definierten Namensvarianten der Institutionen abgeglichen. Zudem werden Autoren- und Affiliationsangaben auf die ersten 2500 Zeichen gekürzt. So werden Probleme durch sehr lange Autorenlisten bei der Weiterverarbeitung der Daten (z.\,B. in Tabellenkalkulationsprogrammen) vermieden.
 
-\paragraph{7. CrossRef-Daten}
-Publikationen, die eine DOI haben, deren ISSN bzw. eISSN aber nicht im \textit{DOAJ} gefunden werden konnte, werden über das Teilskript \texttt{cr.py} an die \textit{CrossRef}-API\footnote{Die Basis-URL für diese Abfrage lautet \url{http://api.crossref.org/works/}. Ein API-key ist für diese Abfragen nicht erforderlich. Eine ausführliche API-Dokumentation stellt \textit{CrossRef} online bereit, s. \url{https://github.com/CrossRef/rest-api-doc/}.} geschickt. Publikationen, für die bei \textit{CrossRef} eine Creative-Commons-Lizenz oder eine ACS-Author-Choice-Lizenz\footnote{Die American Chemical Society (ACS) vergibt z.\,T. selbst entwickelte Open-Access-Lizenzen, vgl. \url{http://pubs.acs.org/page/policy/authorchoice/index.html}.} hinterlegt ist, werden identifiziert und die Lizenz-URL gespeichert. Diese Artikel erhalten außerdem die Notiz \textit{Licence added via CrossRef}. Ziel ist, OA-Artikel in Hybridzeitschriften zu identifizieren.
+Einige Datenbanken liefern keine bzw. uneinheitlich strukturierte Informationen zur Korres\-pondenzautorschaft, was eine automatisierte Verarbeitung erschwert bzw. unmöglich macht. Im nächsten Schritt werden daher die restlichen Publikationen in einer separaten Datei gespeichert (\texttt{docstobechecked.txt}). Es handelt sich erfahrungsgemäß um relativ wenige OA-Publikationen \footnote{{Für Analysen ausgehend von den im Skript angelegten Datenbanken lag der Anteil der Artikel bei unter einem Prozent. Werden bestimmte Datenbanken ausgenommen bzw. weitere hinzugefügt, kann sich der Anteil an Artikel verschieben, für die manuell die Affiliation der Korrespondenzautorin bzw. des Korrespondenzautors ermittelt werden muss.}}
+, für die manuell die Affiliation der Korrespondenzautorin bzw. des Korrespondenzautors ermittelt werden muss. Die händisch ermittelten Daten können wieder in das Skript eingelesen werden (vgl. hierzu \textit{10. Daten für manuelle Prüfung Korrespondenzautorschaft} auf S. \pageref{man-corr-author}).
 
-Bei einigen dieser Artikel fehlen ISSN-Angaben in den Ausgangsdaten. Für über \textit{CrossRef} ermittelte OA-Artikel werden ISSN-Angaben aus den \textit{CrossRef}-Daten ergänzt und durch Abfrage der \textit{DOAJ}-API wird geprüft, ob es sich eine echte Open-Access-Zeitschrift handelt. So können weitere OA-Artikel in echten OA-Zeitschriften identifiziert werden.
+\paragraph{7. DOAJ-Daten}
+Die relevanten Informationen aus dem DOAJ werden eingelesen. Die ISSNs und eISSNs werden mit der Liste der gefundenen Publikationen abgeglichen. Die so gefundenen OA-Artikel in echten OA-Zeitschriften erhalten den OA-Status \texttt{gold} und werden mit Daten zu Fachgebiet, Verlag und Lizenz aus dem DOAJ angereichert.
+In der Ausgabedatei werden die so identifizierten Artikel mit dem Hinweis \texttt{Identified via DOAJ} in der Spalte \texttt{notes} markiert.
 
-Die Ergebnisse der \textit{CrossRef}- und \textit{DOAJ}-Abfragen werden in den Dateien \texttt{CRResults} und \texttt{CRResultsDOAJ} gespeichert. Im Folgenden kann die Funktion des Skripts mithilfe der Variable \texttt{contactCR} im ersten Teil des Skripts deaktiviert werden, um die Daten aus den beiden Dateien zu laden. Die zeitaufwändige Abfrage der Schnittstellen entfällt damit.
+\paragraph{8. CrossRef-Daten}
+Für Publikationen, die eine DOI aber keine ISSN haben, wird die Crossref-API\footnote{Die Basis-URL für diese Abfrage lautet \url{http://api.crossref.org/works/}. Ein API-key ist für diese Abfragen nicht erforderlich. Eine ausführliche API-Dokumentation stellt Crossref online bereit, s. \url{https://github.com/CrossRef/rest-api-doc/}.} abgefragt. Die so ermittelten ISSNs werden erneut mit den DOAJ-Daten abgeglichen, um ggf. weitere Artikel in Open-Access-Zeitschriften zu identifizieren.
 
-\paragraph{8. Erst- bzw. Korrespondenzautorschaft} \label{func-corr-author}
-Es wird untersucht, welche Publikationen eine Autorin bzw. einen Autor der gesuchten Institution(en) als Erst- bzw. Korrespondenzautorin haben. Dazu werden die von \textit{Web of Science}, \textit{SciFinder} und \textit{PubMed} bereitgestellten Affiliationsangaben mit den in Abschnitt 3 des Skript definierten Namensvarianten der Institutionen abgeglichen. Zudem wird die Autorenangabe auf die ersten 200 Zeichen gekürzt. So werden Probleme durch sehr lange Autorenlisten bei der Weiterverarbeitung der Daten (z.\,B. in Tabellenkalkulationsprogrammen) vermieden.
+\paragraph{9. Unpaywall-Daten} \label{oaDOI}
+Für Publikationen, die eine DOI haben, wird die Unpaywall-API\footnote{Die Basis-URL für diese Abfrage lautet \url{https://api.unpaywall.org/}. Ein API-key ist für diese Abfragen nicht erforderlich, aber es muss in der Anfrage eine gültige E-Mail-Adresse angegeben werden. Eine API-Dokumentation stellt Unpaywall online bereit, s. \url{https://unpaywall.org/api/v2}.} abgefragt. So können weitere Open-Access-Artikel identifiziert werden. Als \texttt{hybrid} wird ein Artikel dann gewertet, wenn es laut Unpaywall eine OA-Version gibt, die über den Verlag direkt und unter einer freien Lizenz zugänglich ist. Als \texttt{green} wird ein Artikel dann gewertet, wenn es laut Unpaywall eine OA-Version gibt, die über ein gesichertes Repositorium zugänglich ist. In der Ausgabedatei werden die so identifizierten Artikel mit dem Hinweis \texttt{Identified via Unpaywall} in der Spalte \texttt{notes} markiert.
 
-Die restlichen analysierten Datenbanken liefern (in dem gewählten Exportformat) keine bzw. uneinheitlich strukturierte Informationen zur Korrespondenzautorschaft, was eine automatisierte Verarbeitung erschwert bzw. unmöglich macht. Im nächsten Schritt werden daher die restlichen Publikationen in einer Datei namens \texttt{docstobechecked.txt} gespeichert. Es handelt sich erfahrungsgemäß um etwa 10\,\% der OA-Publikationen, für die manuell die Affiliation der Korrespondenzautorin bzw. des Korrespondenzautors ermittelt werden muss.
+\paragraph{10. Daten für manuelle Prüfung Korrespondenzautorschaft} \label{man-corr-author}
 
-Die händisch ermittelten Daten können wieder in das Skript eingelesen werden, indem sie in Form einer tab-separierten Textdatei namens \texttt{docsChecked.txt} in der Codierung UTF-8 gespeichert und die Funktionalität zum Einlesen dieser Datei mithilfe der Variable \texttt{checkToDo} im ersten Teil des Skripts aktiviert wird. In der Datei \texttt{docsChecked.txt} muss jede Zeile einer Publikation entsprechen und die drei Spalten den Titel, die DOI und die gefundene Namensvariante (in dieser Reihenfolge) enthalten.
+Einige Datenbanken liefern keine bzw. uneinheitlich strukturierte Informationen zur Korres\-pondenzautorschaft. Um die Genauigkeit und Vollständigkeit der Analyse zu optimieren, können Artikel mit fehlenden Daten manuell überprüft werden. Hierzu sind die in der Datei \texttt{docstobechecked.txt} gelisteten Artikel zu prüfen. Die händisch ermittelten Daten können wieder in das Skript eingelesen werden, indem sie in Form einer tab-separierten Textdatei (ohne Kopfzeile) namens \texttt{docsChecked.txt} in der Codierung UTF-8 gespeichert und die Funktionalität zum Einlesen dieser Datei mithilfe der Variable \texttt{checkToDo} im ersten Teil des Skripts aktiviert wird. In der Datei \texttt{docsChecked.txt} muss jede Zeile einer Publikation entsprechen und in drei Spalten den Titel, die DOI und die gefundene Institution (wie er im Skript angesetzt ist) in dieser Reihenfolge enthalten. In der Ausgabedatei werden die so identifizierten Artikel mit dem Hinweis \texttt{Checked by hand} in der Spalte \texttt{notes} markiert.
 
-\paragraph{9. APCs abschätzen}
-Die Gesamtzahl von OA-Artikeln, für die die Erst- bzw. Korrespondenzautorschaft bei der/den untersuchten Institution(en) liegt,  wird mit 1285~\euro\footnote{Es handelt sich dabei um die durchschnittliche Gebühr für Artikel in OA-Zeitschriften der an OpenAPC-teilnehmenden Institutionen, vgl. \url{https://github.com/OpenAPC/openapc-de} (Stand 26.~April 2016).} bzw. 980~\euro\footnote{Es handelt sich hierbei um die durchschnittliche Gebühr für OA-Artikel, die ausgehend von den in 2014 und 2015 publizierten Artikeln von Angehörigen der TU Berlin und den Angaben zu APC auf den Verlagswebseiten ermittelt wurde.} multipliziert und die Resultate werden im Terminal ausgegeben. Sollen andere Durchschnittsgebühren zugrunde gelegt werden, können im Skript die Werte 1285 bzw. 980 ersetzt werden. Beide Werte liefern -- ausgehend von unterschiedlichen Durchschnittskosten -- einen Überschlag über die anfallenden Kosten für Artikelgebühren pro Jahr. Für eine fundierte Angabe zum Mittelbedarf sollten die Einzelartikel im Detail betrachtet werden, denn die Daten des OpenAPC-Projekts zeigen deutliche Schwankungen der durchschnittlichen Artikelgebühr: So hat die Technische Universität Dortmund im Schnitt 915~\euro, die Universität Heidelberg im Schnitt 1434~\euro\ pro Artikel gezahlt.\footnote{Vgl. Zahlen zu Artikelgebühren der an OpenAPC-teilnehmenden Institutionen, \url{https://github.com/OpenAPC/openapc-de} (Stand 26.~April 2016).}
+\paragraph{11. APCs abschätzen und Ausgabedateien}
+Im Terminal werden absolute Zahlen für die identifizierten OA-Artikel sowie erste Schätzwerte für APC-Kosten ausgegeben: Die Gesamtzahl von Artikeln in Open-Access-Zeitschriften, für die die Erst- bzw. Korrespondenzautorschaft bei der/den untersuchten Institution(en) liegt, wird mit 1481~\euro\footnote{{Es handelt sich dabei um die durchschnittliche Gebühr für Artikel in OA-Zeitschriften der an OpenAPC teilnehmenden Institutionen, vgl. \url{https://github.com/OpenAPC/openapc-de} (Stand 21.~September 2017).}}
+multipliziert und die Resultate werden im Terminal ausgegeben. Sollen andere Durchschnittsgebühren zugrunde gelegt werden, kann im Skript der aktuelle Durchschnittswert ersetzt werden. Damit wird einen Überschlag über die anfallenden Kosten für Artikelgebühren pro Jahr errechnet. 
 
-\paragraph{10. Statistik und Analyse} \label{analyse}
-Es werden die folgenden Informationen in tab-separierte Textdateien geschrieben:
+Für eine fundierte Angabe zum Mittelbedarf sollten die Einzelartikel im Detail betrachtet werden, denn die Daten des OpenAPC-Projekts zeigen deutliche Schwankungen der durchschnittlichen Artikelgebühr: So hat die Technische Universität Dortmund im Schnitt 1031~\euro, die Universität Heidelberg im Schnitt 1480~\euro\ pro Artikel gezahlt.\footnote{Vgl. Zahlen zu Artikelgebühren der an OpenAPC-teilnehmenden Institutionen, \url{https://github.com/OpenAPC/openapc-de} (Stand 21.~September 2017).} Im Terminal werden daher zusätzlich Überschläge basierend auf Angaben zu APC-Kosten pro Zeitschrift laut DOAJ ausgegeben; diese Angabe erfolgt nach verschiedenen Währungen getrennt in absoluten Zahlen.
+
+\paragraph{12. Statistik und Analyse} \label{analyse}
+Es werden die folgenden Auswertungen vorgenommen:
+\begin{itemize}
+     \item Für jedes Jahr werden die Gesamtzahl a) der gefundenen Artikel sowie jeweils die Gesamtzahl der b) OA-Artikel in Open-Access-Zeitschriften, c) OA-Artikel in Hybridzeitschriften, d) OA-Artikel über den Grünen Weg und e) der OA-Artikel in Open-Access-Zeitschriften mit Erst- bzw. Korrespondenzautorschaft bei einer gesuchten Institution ausgegeben. Für alle Werte wird außerdem die Summe über alle untersuchten Jahre gebildet. Die Resultate werden in der Textdatei \texttt{statistics\_OA.txt} gespeichert.
+     \item Für OA-Artikel in OA-Zeitschriften (d.\,h. Artikel mit dem OA-Status \texttt{gold}) werden die vorhandenen Angaben zu Verlagen analysiert; es wird eine Statistik über die Häufigkeitsverteilung der OA-Artikel auf die vorhandenen Verlage erstellt. Die Ergebnisse der Analyse werden in der Datei \texttt{statistics\_publishers.txt} gespeichert. Hier ist zu beachten, dass die Verlagsnamen nicht normiert sind und daher noch händisch bereinigt werden müssen. 
+\end{itemize}
+
+\subsection{Ausgabedateien für weitere Analyse} \label{outputfiles}
+Es werden die folgenden Informationen in tab-separierte Textdateien geschrieben, die für detaillierte Auswertungen in Tabellenkalkulationsprogramme (bspw. Excel) importiert werden können:
 \begin{itemize}
 \item \texttt{allPubs.txt} = Liste aller gefundenen Artikel
-\item \texttt{allOAPubs.txt} = Liste aller gefundenen OA-Artikel
-\item \texttt{allOAPubsWithCorrAuthor.txt} = Liste aller OA-Artikel mit einer Autorin bzw. einem Autor der analysierten Einrichtung(en) als Erst- bzw. Korrespondenzautor. Es fehlen die Publikationen, die in der Datei \texttt{docstobechecked} zu finden sind.
 \item \texttt{docsToBeChecked.txt} = Liste der Publikationen, für die es nicht möglich ist, die Erst- bzw. Korrespondenzautorschaft automatisch zu ermitteln
-\item \texttt{hybridArticles.txt} = Liste aller gefundenen OA-Artikel in Hybridzeitschriften
+\item \texttt{oaDOI-response.txt} = Liste der Publikationen, für die die Unpaywall-API abgefragte wurde inkl. einzelne Datenfelder dieser Schnittstelle (OA-Status Artikel, OA-Status Journal, Quelle für OA-Version, freie Lizenz, Verlag, OA-Farbe)  
+\item \texttt{statistics\_OA.txt} = Statistik der analysierten Artikel
+\item \texttt{statistics\_goldPublishers.txt} = Häufigkeitsverteilung der Gold-Artikel (OA-Artikel in OA-Zeitschriften) auf Verlage
+\item \texttt{DOIs-oaDOI-error.txt} = Liste der DOIs, für die Unpaywall eine Fehlermeldung zurückgegeben hat
 \end{itemize}
-Alle Dateien sind wie in Abschnitt \textit{4. Datenbanken ansetzen und Daten einlesen} (vgl. S.~\pageref{readinput}) beschrieben formatiert. Diese Dateien können für detaillierte Auswertungen in Tabellenkalkulationsprogramme (bspw. \textit{Excel}) importiert werden.
-
-Außerdem werden die folgenden Auswertungen vorgenommen:
-\begin{itemize}
-	\item Für jedes Jahr werden a) die Gesamtzahl der gefundenen Artikel sowie jeweils die  Gesamtzahl und der Prozentsatz der b) OA-Artikel in Open-Access-Zeitschriften, c) OA-Artikel in Hybridzeitschriften und d) der OA-Artikel in Open-Access-Zeit\-schriften mit Erst- bzw. Korrespondenzautorschaft bei einer gesuchten Institution ausgegeben. Für alle Werte wird außerdem die Summe über alle untersuchten Jahre gebildet. Die Resultate werden auch in Form einer Grafik (\texttt{Figure\_OANumbers.png}) ausgegeben und in der Textdatei \texttt{statistics\_OA.txt} gespeichert.
-    \item Der Prozentanteil der OA-Artikel in Open-Access-Zeitschriften, gemessen an der Gesamtzahl der Publikationen, und der Anteil der Publikationen mit Erst- bzw. Korrespondenzautorschaft einer relevanten Institution werden im Jahresvergleich in Form einer Grafik (\texttt{Figure\_OAShare.png}) ausgegeben.
-    \item Der absolute Zuwachs an Publikationen insgesamt und an OA-Artikeln in Open-Access-Zeitschriften im Vergleich zum Vorjahr wird in Form einer Grafik ausgegeben (\texttt{Figure\_OAIncrease.png}).
-    \item Die in der Datei \texttt{allOAPubsWithCorrAuthor.txt} vorhandenen Angaben zu Verlagen werden analysiert; es wird eine Statistik über die Häufigkeitsverteilung der OA-Artikel auf die vorhandenen Verlage erstellt. Die Ergebnisse der Analyse werden in der Datei \texttt{statistics\_publishers.txt} gespeichert.
-\end{itemize}
-
-Weiterhin werden die folgenden Dateien ausgegeben:
-\begin{itemize}
-	\item \texttt{CRResults.txt} = Liste der an \textit{CrossRef} gesendeten DOIs und den abgefragten Informationen: ISSN, Lizenz-URL und das Feld, in dem die URL hinterlegt war. In der letzten Spalte wird auch hinterlegt, falls die Schnittstelle eine Fehlermeldung zur angefragten DOI sendete, entweder weil die DOI \textit{CrossRef} unbekannt ist oder weil die DOI einen Fehler enthält.
-    \item Die Datei \texttt{DOAJResults.txt} enthält eine Liste aller ISSNs, die an die \textit{DOAJ}-API geschickt wurden und die entsprechende Antwort der Schnittstelle.
-    \item Die Dateien \texttt{CRResults}, \texttt{CRResultsDOAJ} und \texttt{finalList}
-enthalten Informationen, die vom Skript wieder eingelesen werden können (s.\,o.) und sind nur für die interne Datenverarbeitung relevant.
-\end{itemize}
+Die Datei \texttt{allPubs.txt} ist wie in Abschnitt \textit{4. Datenbanken ansetzen und Daten einlesen} (vgl. S.~\pageref{readinput}) beschrieben formatiert. Eine Übersicht über alle Felder sowie deren Herkunft ist dem Anhang zu entnehmen (vgl. Tab.~\ref{tab:art-data} auf S.~\pageref{tab:art-data}).
 
 \subsection{Eine neue Institution ansetzen} \label{newinst}
 Im Skript können beliebig viele Institutionen gleichzeitig verarbeitet werden. Für jede Institution können außerdem beliebig viel Namensvarianten angesetzt werden, nach denen in den Affiliationsangaben der Datenbanken gesucht wird. Neue Institutionen lassen sich wie folgt ansetzen:
@@ -85,7 +86,7 @@ HU = inst('HU', HUnames)
 
 Dabei entspricht der Ausdruck \texttt{[['Humboldt','Univ','Berlin'], ['Berlin','HU']]} der Suche \texttt{(('Humboldt' AND 'Univ' AND 'Berlin') OR ('Berlin' AND 'HU'))}.
 
-Die obigen Namensvarianten sind möglichst allgemein formuliert -- so deckt die Buchstabenkombination \texttt{Univ} sowohl die Begriffe \texttt{Universität} und \texttt{University}, als auch die nicht unübliche Abkürzung \texttt{Univ} ab. Da die meisten Datenbanken nur eine Affiliation pro Autorin bzw. Autor verzeichnen, erleichtert die allgemeine Ansetzung der Namensvarianten die Suche. Eine Ausnahme bildet jedoch \textit{PubMed}: Hier werden mitunter mehrere Institutionen pro Autorin bzw. Autor verzeichnet. Bei Institutionen wie der Humboldt-Universität zu Berlin, die einen relativ distinktiven Namen hat, verursacht dies keine großen Probleme. Bei Institutionen wie der Technischen Universität Berlin kann dies jedoch zu Problemen führen. Gehört eine Autorin bzw. ein Autor zum Beispiel der Technischen Universität Dresden und einer beliebigen anderen Institution in Berlin an, so würden die obigen Namensvarianten im Falle von \textit{PubMed} eine Zugehörigkeit zur TU Berlin verzeichnen. Um dieses Problem zu umgehen, kann im Skript eine zweite Liste mit Namensvarianten angelegt werden. Dies muss ganz am Ende des dritten Abschnitts nach dem folgenden Muster geschehen:
+Die obigen Namensvarianten sind möglichst allgemein formuliert -- so deckt die Buchstabenkombination \texttt{Univ} sowohl die Begriffe \texttt{Universität} und \texttt{University}, als auch die Abkürzung \texttt{Univ} ab. Die allgemeine Ansetzung der Namensvarianten erleichtert so die Suche. Bei Institutionen wie der Humboldt-Universität zu Berlin, die einen relativ distinktiven Namen hat, verursacht dies keine großen Probleme. Bei Institutionen wie der Technischen Universität Berlin kann dies jedoch zu Problemen führen. Gehört eine Autorin bzw. ein Autor zum Beispiel der Technischen Universität Dresden und einer beliebigen anderen Institution in Berlin an, so würden die obigen Namensvarianten eine Zugehörigkeit zur TU Berlin verzeichnen. Um dieses Problem zu umgehen, kann im Skript eine zweite Liste mit Namensvarianten angelegt werden. Wird diese Option genutzt, sollten so viele verschiedene Varianten wie möglich angelegt werden, da im Skript dann lediglich ein genauer Zeichenabgleich erfolgt von den hier hinterlegten Varianten mit den vorhandenen Affiliationsangaben in den Datenbanken. Dies muss am Ende des dritten Abschnitts nach dem folgenden Muster geschehen:
 \begin{verbatim}
 TU.nameVar1 = [['Technische Universitat Berlin'],
                ['Technische Universitaet Berlin'],
@@ -103,64 +104,77 @@ TU.nameVar1 = [['Technische Universitat Berlin'],
                ['Berlin University of Technology']]
 \end{verbatim}
 
-Falls keine zweite Liste mit Namensvarianten angegeben wird, werden in \textit{PubMed} die ursprünglichen Namensvarianten gesucht. In dem Skript ist diese Liste mit Namensvarianten aktuell für die TU Berlin aktiv. Sie kann kurzfristig ausgenommen werden, indem eine Raute (\texttt{\#}) an den Anfang jeder Zeile in diesem Abschnitt gesetzt wird. Um diese Option dauerhaft auszuschließen, sind die jeweiligen Zeilen im Skript zu löschen.
+Zurzeit werden im Skript die allgemeinen Namensvarianten für die Affiliationssuche in der Angabe der Korrespondenzautorschaft verwendet, da hier in vielen Fällen nur eine Affiliation angegeben ist. Die zweite Variante wird verwendet, wenn die Liste aller Affiliationen eines Artikels durchsucht wird.
+
+Falls keine zweite Liste mit Namensvarianten angegeben wird, werden die ursprünglichen Namensvarianten verwendet. In dem Skript ist diese Liste mit Namensvarianten aktuell für die TU Berlin aktiv. Sie kann kurzfristig ausgenommen werden, indem eine Raute (\texttt{\#}) an den Anfang jeder Zeile in diesem Abschnitt gesetzt wird. Um diese Option dauerhaft auszuschließen, sind die jeweiligen Zeilen im Skript zu löschen.
 
 \subsection{Eine Datenbank von der Analyse ausschließen}
-Jede Datenbank hat zwei Abschnitte im vierten Teil des Skripts. Der erste Abschnitt umfasst nur eine Zeile und definiert Namen und ID-Nummer der Datenbank. Im zweiten Abschnitt werden die Daten aus der Datenbank eingelesen. \textit{Web of Science} ist ein elementarer Teil des Skripts und kann nicht von der Analyse ausgeschlossen werden. Alle anderen Datenbanken lassen sich wie folgt ausschließen:
+Jede Datenbank hat zwei Abschnitte im vierten Teil des Skripts. Der erste Abschnitt umfasst nur eine Zeile und definiert Namen und ID-Nummer der Datenbank. Im zweiten Abschnitt werden die Daten aus der Datenbank eingelesen. Web of Science ist ein elementarer Teil des Skripts und kann nicht von der Analyse ausgeschlossen werden. Alle anderen Datenbanken lassen sich wie folgt ausschließen:
 \begin{enumerate}
-\item Ersten Abschnitt finden. Dieser befindet sich im ersten Textblock des vierten Teils des Skripts und entspricht dem folgenden Beispiel:
+\item Ersten Abschnitt finden. Dieser befindet sich im ersten Textblock des vierten Teils des Skripts und ist wie das folgende Beispiel formuliert:
 \begin{verbatim}
 dbLisa = Database('LISA', 15)
 \end{verbatim}
 \item Zweiten Abschnitt finden. Dieser befindet sich am Ende des vierten Teils des Skripts. Der Name der Datenbank wird explizit im zugehörigen Kommentar erwähnt, zum Beispiel:
 \begin{verbatim}
 # Read in 'LISA' file and extract relevant information.
-dbLisa.content = wosFormat('lisa20xx.txt', dbLisa.idNummer)
+dbLisa.content = risFormat('input-files/lisa2016.ris', dbLisa.idNummer)
 print 'Finished reading in LISA'
 \end{verbatim}
-\item Falls die Datenbank permanent von der Analyse ausgeschlossen werden soll, können alle Zeilen dieser beiden Abschnitte gelöscht werden. Soll die Datenbank nur kurzzeitig ausgeschlossen werden, müssen  alle Zeilen der beiden Abschnitte auskommentiert werden, indem man eine Raute (\texttt{\#}) an die Zeilenanfänge setzt.
+\item Falls die Datenbank permanent von der Analyse ausgeschlossen werden soll, können alle Zeilen dieser beiden Abschnitte gelöscht werden. Soll die Datenbank nur kurzzeitig ausgeschlossen werden, können alle Zeilen der beiden Abschnitte auskommentiert werden, indem jeweils eine Raute (\texttt{\#}) an die Zeilenanfänge gesetzt wird.
 \end{enumerate}
 
 \subsection{Eine neue Datenbank aufnehmen}
-Eine Liste der aktuell integrierten Datenbanken ist Kap.~\ref{used-DBs} ab S.~\pageref{used-DBs} zu entnehmen. Eine neue Datenbank kann dann einfach zur Auswertung hinzugefügt werden, wenn die Daten mithilfe von \textit{Citavi} in das \textit{WoS}-Datenformat umgewandelt werden. Diese Methode wurde bisher z.\,B. für die Datenbanken \textit{TEMA} und \textit{ProQuest} verwendet.
+Eine Liste der aktuell integrierten Datenbanken ist Kap.~\ref{used-DBs} ab S.~\pageref{used-DBs} zu entnehmen. Eine neue Datenbank kann einfach zur Auswertung hinzugefügt werden (Fall A), wenn die Daten mithilfe von Citavi in das WOS-Datenformat umgewandelt werden. Diese Methode wurde in einer früheren Version des Skripts z.\,B. für die Datenbanken TEMA und ProQuest verwendet. Eine häufig bessere Datenqualität wird beim direkten Einlesen von RIS-Daten erreicht; hierzu muss jedoch vorab eine detaillierte Analyse der RIS-Felder erfolgen und das entsprechende Mapping in der Hilfsdatei \texttt{RIS-fields.csv} eingetragen werden (Fall B).
 
 Eine Datenbank lässt sich wie folgt hinzufügen:
 \begin{enumerate}
 \item Abfrage in der Datenbank durchführen und die Vorgehensweise dokumentieren.
-\item Resultate exportieren (z.\,B. im RIS-Format) und in \textit{Citavi} importieren.
-\item Resultate aus \textit{Citavi} im \textit{WoS}-Datenformat exportieren und im gleichen Verzeichnis wie sonstige Datenbankergebnisse ablegen (Dateiname z.\,B. \texttt{testa20xx.txt}).
+\item Resultate exportieren (z.\,B. im RIS-Format).
 \item Im vierten Teil des Skripts zwei neue Abschnitte für diese Datenbank hinzufügen:
 \begin{itemize}
-\item[a)] Namen, Datenbank-ID und Variablennamen für die Datenbank nach dem vorhandenen Muster am Anfang des vierten Teils des Skripts anlegen (im Textblock, der auf den Kommentar \texttt{\# - Set up databases} folgt). Für eine Datenbank namens \textit{Testa} könnte dies zum Beispiel wie folgt aussehen: 
+\item[a)] Namen, Datenbank-ID und Variablennamen für die Datenbank nach dem vorhandenen Muster am Anfang des vierten Teils des Skripts anlegen (im Textblock, der auf den Kommentar \texttt{\# Set up databases} folgt). Für eine Datenbank namens \textit{Testa} könnte dies zum Beispiel wie folgt aussehen: 
 \begin{verbatim}
 dbTesta = Database('Testa', 77)
 \end{verbatim}
-Dabei entspricht \texttt{dbTesta} dem Variablennamen, der intern im Skript für die Datenbank verwendet wird, \texttt{Testa} ist der Name der Datenbank und \texttt{77} ist die Datenbank-ID\footnote{Über diese ID können in den Ausgabedateien später die Artikeldaten identifiziert werden, die aus dieser Datenbank stammen.}. Alle drei Werte sind beliebig, müssen aber im Skript eindeutig sein.
-\item[b)] Zeilen im Skript nach dem vorhandenen Muster im vierten Teil des Skripts ergänzen, um die Daten einlesen zu lassen. Für unsere Datenbank \textit{Testa} würde dies wie folgt aussehen:
+Dabei entspricht \texttt{dbTesta} dem Variablennamen, der intern im Skript für die Datenbank verwendet wird, \texttt{Testa} ist der Name der Datenbank und \texttt{77} ist die Datenbank-ID. Alle drei Werte sind beliebig, müssen aber im Skript eindeutig sein.
+\item[b)] Zeilen im Skript nach dem vorhandenen Muster im vierten Teil des Skripts ergänzen, um die Daten einlesen zu lassen. Für unsere Datenbank \textit{Testa} würde dies für Fall A (WOS-Format) wie folgt aussehen:
 \begin{verbatim}
 # Read in 'Testa' file and extract relevant information.
-dbTesta.content = wosFormat('testa20xx.txt', dbTesta.idNummer)
+dbTesta.content = wosFormat('input-files/testa20xx.txt', 
+dbTesta.idNummer)
 print 'Finished reading in Testa'
 \end{verbatim}
-Vorsicht: Neue Datenbanken müssen vor den letzten Abschnitt des vierten Skriptteils (\textit{Transform all characters in DOIs to lower case}) hinzugefügt werden.
+\item[c)] Definieren, in welchem Format die Daten eingelesen werden sollen (\texttt{wosformat} oder \texttt{risformat}). Für unsere Datenbank \textit{Testa} würde dies für Fall B (RIS-Format) wie folgt aussehen:
+\begin{verbatim}
+# Read in 'Testa' file and extract relevant information.
+dbTesta.content = risFormat('input-files/testa20xx.txt', 
+dbTesta.idNummer)
+print 'Finished reading in Testa'
+\end{verbatim}
+Vorsicht: Neue Datenbanken müssen vor dem letzten Abschnitt des vierten Skriptteils hinzugefügt werden, d.\,h. vor der Zeile \texttt{\# Transform all characters in DOIs to lower case}.
+\end{itemize}
+\item Einlesen der Daten vorbereiten (Fall A oder B):
+\begin{itemize}
+\item[A)] Resultate in Citavi importieren, aus Citavi im WOS-Datenformat exportieren und im gleichen Verzeichnis wie sonstige Datenbankergebnisse ablegen (Dateiname z.\,B. \texttt{testa20xx.txt}).
+\item[B)] Neue Spalte für die neue Datenbank in der Hilfsdatei \texttt{RIS-fields.csv} anlegen\footnote{Als Feldtrennzeichen sind Semikolons zu nutzen.} und dabei die im Python-Skript hinterlegte Datenbank-ID als Spaltennamen eintragen. Die aus der Datenbank exportierten Daten detailliert analysieren und in der CSV-Datei die passenden RIS-Felder zuordnen. Bei dieser Variante muss berücksichtigt werden, dass z.\,B. Datumsangaben in den unterschiedlichen Datenbanken nicht einheitlich formatiert werden. Die üblichsten Formate sind bereits berücksichtigt, hier liegt allerdings eine potentielle Fehlerquelle. Auch sind im RIS-Format Angaben zu Affiliationen und Korrespondenzautorschaft oft in einem Feld mit anderen Informationen angegeben, die damit das Ergebnis verfälschen können. In diesem Fall wäre es nötig, im zweiten Skriptteil die Funktion \texttt{risFormat} individuell anzupassen.
 \end{itemize}
 \end{enumerate}
 
 \subsection{Potentielle Fehlerquellen}
+\label{potentialErrors}
 Die folgenden Faktoren können Fehler in der Analyse mithilfe des hier beschriebenen Skripts verursachen:
 \begin{itemize}
-\item In \textit{WoS} werden alle Titel ins Englische übersetzt. Ist ein Titel in einer anderen Datenbank mit dem deutschen Titel verzeichnet und hat dieser Artikel keine DOI, würde diese Publikation doppelt gezählt.
+\item In WoS werden alle Titel ins Englische übersetzt. Ist ein Titel in einer anderen Datenbank mit dem deutschen Titel verzeichnet und hat dieser Artikel keine DOI, würde diese Publikation doppelt gezählt.
 \item Ist der Autorenname sehr kurz bzw. enthält nur wenige Konsonanten (z.\,B. Lee, Zhi), kann es zu Fehlern beim Dublettenabgleich kommen, falls eine Datenbank nur den ersten Buchstaben des Vornamens, eine andere Datenbank aber den vollständigen Vornamen erfasst.
 \item Es kann zu Fehlern beim Dublettenabgleich kommen, wenn der Nachname der Autorin bzw. des Autors aus zwei Wörtern (z.\,B. da Silva) besteht und in den Datenbanken uneinheitlich nachgewiesen ist (da Silva, H. oder Silva, H. da).
-\item \textit{PubMed} verzeichnet teilweise mehrere Publikationsdaten, die sich in seltenen Fällen in der Jahresangabe unterscheiden. Im Skript wird lediglich eines der beiden Datumsfelder benutzt (\texttt{DP = Date of Publication}). Andere Datenbanken verzeichnen nur ein einziges Publikationsdatum. Artikel, die nur in \textit{PubMed} verzeichnet werden, enthalten so manchmal Jahresangaben, die von der ursprünglichen Suchabfrage nicht abgedeckt sind. Wird zum Beispiel nach Artikeln aus dem Jahr 2015 gesucht, können auch Artikel enthalten und nachgewiesen werden, deren Publikationsdatum ins Jahr 2016 fällt.
+\item Zur Bestimmung des Anteils hybrider OA-Artikel werden bestimmte Annahmen getroffen (hybrid = OA-Version unter freier Lizenz über Verlag direkt zugänglich). Werden andere Annahmen getroffen (z.\,B. OA-Version über Verlag direkt zugänglich -- auch ohne freie Lizenz), werden durch das Skript ggf. nicht alle entsprechenden Artikel identifiziert. Hinweise zu manuellen Prüfung weiterer OA-Artikel sind \ref{cleanupData} ab. S.~\pageref{cleanupData} zu entnehmen.
+\item Bei Academic Search Premier handelt es sich um eine Meta-Datenbank, über die viele verschiedene Datenbanken gleichzeitig abgefragt werden können. Die produzierte Ausgabedatei enthält dadurch eine relativ hohe Anzahl an Dubletten sowie Publikationsdaten in vielen verschiedenen Metadatenformaten. Dadurch wird die Verarbeitung erschwert und Daten aus dieser Quelle sind besonders fehleranfällig.
 \end{itemize}
 
 \subsection{Mögliche Erweiterungen}
 Bei der Erstellung des Skripts wurde auf ein möglichst effizientes Aufwand-Nutzen-Verhältnis geachtet. Daher wurden einige denkbare Erweiterungen und Verbesserungen des Skripts bislang nicht umgesetzt:
 \begin{itemize}
 \item Dublettencheck verbessern: Eine weitere denkbare Methode für den Dublettencheck besteht darin, aus ISSN, Jahrgang, Ausgabe und Seitenzahlen einen String zu bilden. So erhält man einen weiteren eindeutigen Identifikator, der zum Abgleich herangezogen werden kann.
-\item Ergänzung der ISSNs: Da einige Datenbanken keine ISSNs bereitstellen, könnte man routinemäßig für diese Fälle die \textit{CrossRef}-API abfragen (solange eine DOI vorliegt) und Angaben zu ISSNs in den internen Artikelindex aufnehmen.
-\item Ausschlusskriterien: Um die Institutionssuche in den Affiliationsangaben zu verbessern, könnte eine Liste von Wörtern festgelegt werden, die nicht in der Affiliationsangabe vorkommen dürfen. So besteht für die TU Berlin eine gewisse Verwechslungsgefahr mit der Beuth Hochschule für Technik Berlin, insbesondere wenn gleichzeitig der englische Name (Beuth University of Applied Sciences) angegeben wird. Um dieses Problem zu umgehen, könnte man alle Artikel, deren Affiliationsangaben das Wort \texttt{Beuth} enthalten, automatisch von der Zuordnung zur TU Berlin ausschließen.
-\item Verarbeitung anderer Datenformate: Für viele Datenbanken ist der Export der Daten im RIS-Format und deren Konvertierung ins  \textit{WoS}-Format mithilfe von \textit{Citavi} vorgesehen, um im Skript die Daten in einem einheitlichen Format verarbeiten zu können. Dabei wird zum einen die Abhängigkeit von der Software \textit{Citavi} (vgl. Kap.~\ref{requirements} auf S.~\pageref{requirements}) und zum anderen ein Datenverlust bei der Konvertierung in Kauf genommen. Alternativ könnte das Skript erweitert werden, um Daten direkt im \textit{RIS}-Format einzulesen, welches von vielen Datenbanken angeboten wird. Das \textit{RIS}-Format hat jedoch den Nachteil, dass die Belegung der Felder von Datenbank zu Datenbank sehr unterschiedlich ist. So werden Affiliationsangaben in den Feldern \texttt{AD = Author Address} (\textit{ProQuest}), \texttt{C1 = Custom Field 1} (\textit{TEMA}), \texttt{N1 = Notes} (\textit{BSC}), \texttt{PB = Publisher} (\textit{EBSCO}) oder überhaupt nicht (\textit{IEEE}) verzeichnet. Die Verarbeitung des Datenformats müsste also für jede Datenbank einzeln angepasst werden.
-\item OA-Chronologie berücksichtigen: Der OA-Status einer Zeitschrift wird mithilfe der Ist-Angaben im \textit{DOAJ} geprüft. Eine höhere Genauigkeit könnte erzielt werden, indem das Jahr berücksichtigt wird, in dem eine Zeitschrift in ein Open-Access-Modell überführt wurde. Daten können aus dem \textit{DOAJ} gezogen werden.
+\item Ausschlusskriterien: Um die Institutionssuche in den Affiliationsangaben zu verbessern, könnte eine Liste von Wörtern festgelegt werden, die nicht in der Affiliationsangabe vorkommen dürfen. So besteht für die TU Berlin eine gewisse Verwechslungsgefahr mit der Beuth Hochschule für Technik Berlin, insbesondere wenn gleichzeitig der englische Name (Beuth University of Applied Sciences) angegeben wird. Um dieses Problem zu umgehen, könnte man alle Artikel, deren Affiliationsangaben das Wort \texttt{Beuth} enthalten, automatisch von der Zuordnung zur TU Berlin ausschließen. 
 \end{itemize}

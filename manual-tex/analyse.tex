@@ -5,16 +5,16 @@
 \label{requirements}
 Das Skript wurde für die Python-Version 2.7 entwickelt. Aktuelle Python-Versionen können für verschiedene Betriebssystemplattformen (u.\,a. Windows, Mac OS X und Linux) frei heruntergeladen werden.\footnote{Download unter \url{https://www.python.org/downloads/}. Auf aktuellen Mac- und Linux-Systemen ist Python standardmäßig vorhanden; ggf. muss aber die Version upgedatet werden.} Aufgrund der im Skript eingebundenen Pakete sollte mindestens die Python-Version 2.7.11 installiert sein. Je nach lokal vorhandenem System sind ggf. einzelne Pakete nachzuinstallieren.
 
-Bei Python handelt es sich um Open-Source-Software, die kostenfrei heruntergeladen werden kann. Die Python Software Foundation stellt online Hinweise bzgl. Installation und Handhabung sowie eine ausführliche Dokumentation und ein FAQ bereit\footnote{Python-Dokumentation s. \url{https://docs.python.org}, Hinweise für Anfänger s. insbes. \url{https://www.python.org/about/gettingstarted/}}. Allen, die noch nie ein Skript in einem Terminal oder einer Programmierumgebung gestartet haben, wird die Lektüre der Seite "`Python for Non-Programmers"'\footnote{\url{https://wiki.python.org/moin/BeginnersGuide/NonProgrammers}} empfohlen.
+Bei Python handelt es sich um Open-Source-Software, die kostenfrei heruntergeladen werden kann. Die Python Software Foundation stellt online Hinweise zur Installation und Hand\-habung sowie eine ausführliche Dokumentation und ein FAQ bereit\footnote{Python-Dokumentation s. \url{https://docs.python.org}, Hinweise für AnfängerInnen s. insbes. \url{https://www.python.org/about/gettingstarted/}}. Allen, die noch nie ein Skript in einem Terminal oder einer Programmierumgebung gestartet haben, wird die Lektüre der Seite "`Python for Non-Programmers"'\footnote{\url{https://wiki.python.org/moin/BeginnersGuide/NonProgrammers}} empfohlen.
 
-Während das Skript selbst auf verschiedenen Betriebssystemplattformen lauffähig ist, wird empfohlen, die Dateien für das Einlesen auf einem Windows-System vorzubereiten: Es wurden Probleme beim Einlesen von Dateien festgestellt, die auf einem Mac-System\footnote{Getestet wurde ein Zusammenführen von Dateien (Export aus verschiedenen Datenbanken) unter Mac OS X 10.9.5 und dem Texteditor TextWrangler 5.5.1. Eine Vorbereitung der Dateien in einer Linux-Umgebung wurde bisher nicht getestet.} vorbereitet wurden.
+Während das Skript selbst auf verschiedenen Betriebssystemplattformen lauffähig ist, wird empfohlen, die Dateien für das Einlesen auf einem Windows-System vorzubereiten: Es wurden Probleme beim Einlesen von Dateien festgestellt, die auf einem Mac-System\footnote{Getestet wurde ein Zusammenführen von Dateien (Export aus verschiedenen Datenbanken) unter Mac OS X 10.9.5 und dem Texteditor TextWrangler 5.5.1. Bei dem Vorbereiten von Dateien in einem Mac-Terminal mithilfe von \texttt{cat} wurden bisher keine Probleme festgestellt. Eine Vorbereitung der Dateien in einer Linux-Umgebung wurde bisher nicht getestet.} vorbereitet wurden.
 
-Das Skript kann Daten in zwei nativen Formaten einlesen, \textit{Web of Science} und \textit{PubMed}. Darüber hinaus können Daten aus den folgenden Datenbanken direkt eingelesen werden: \textit{Web of Science Core Collection}, \textit{Inspec} und \textit{PubMed}. Für alle anderen Daten ist für die exportierten bibliographischen Daten eine Konvertierung in des \textit{WoS}-Format notwendig. Dies kann mithilfe von Citavi erfolgen (getestet mit Citavi5). 
-Bei Citavi handelt es sich um eine lizenzpflichtige Software, für die viele deutsche Forschungseinrichtungen eine Campuslizenz erworben haben.
-Citavi kann nativ aktuell nur auf Windows-Betriebssystemen installiert werden.\footnote{Download unter \url{https://www.citavi.com/de/download.html}} Um Citavi auch auf anderen Plattformen nutzen zu können, kann Windows in einer virtuellen Maschine installiert werden.\footnote{Hinweise, wie Citavi auf dem Mac genutzt werden kann, hält das Citavi-Handbuch bereit:\newline
-\url{https://www.citavi.com/sub/manual5/de/index.html}}
+Das Skript kann Daten in zwei nativen Formaten, Web of Science und PubMed, sowie im RIS-Format einlesen. Zwar handelt es sich bei RIS um ein standardisiertes Format, aber der Standard bietet mitunter verschiedene Felder\footnote{So kann der Titel der Zeitschrift z.\,B. in den Feldern \texttt{JO}, \texttt{JF} oder \texttt{T2} angegeben werden.}, lässt verschiedene Feldbelegungen zu\footnote{Zwei Beispiele hierfür sind ISSNs und DOIs: ISSNs können z.\,B. in den Formen \texttt{1234-5678}, \texttt{12345678 (ISSN)} oder \texttt{12345678}, DOIs in den Formen \texttt{10.123/456789}, \texttt{http://dx.doi.org/10.123/456789} oder \texttt{https://doi.org/10.123/456789} angegeben sein.} oder bietet Freitextfelder, in denen etwa Angaben zu Affiliationen oder Projektförderung hinterlegt werden können. Hinzu kommt, dass sich die Verwendung der RIS-Felder durch verschiedene Datenbankanbieter über die Zeit zu ändern scheint. Vor diesem Hintergrund wurde ein Mapping der gesuchten Angaben auf die jeweiligen RIS-Felder pro Datenbank erstellt (s. Hilfsdatei \texttt{RIS-fields.csv}), in der Änderungen bei Feldbelegungen eingetragen werden können. 
 
-Alle Input-Dateien sollten im gleichen Ordner liegen wie das zu startende Python-Skript. In dem gleichen Ordner werden Output-Dateien abgespeichert. Daher müssen für diesen Arbeitsordner sowohl Lese- als auch Schreibrechte vorhanden sein.
+Soll eine neue Datenbank im RIS-Format in die Analyse aufgenommen werden, sollte eine detaillierte Untersuchung der RIS-Daten vorangehen und die passenden Felder in dieser Datei eingetragen werden. Neue Datenbanken können dann einfacher in die Analyse aufgenommen werden, wenn die exportierten Daten vorab in das WOS-Format konvertiert wurden. Dies kann mithilfe von Citavi erfolgen.\footnote{Erfolgreich getestet wurde dies mit Citavi5, Download unter \url{https://www.citavi.com/de/download.html}. Bei Citavi handelt es sich um eine lizenzpflichtige Software, für die viele deutsche Forschungseinrichtungen eine Campuslizenz erworben haben. Citavi kann nativ aktuell nur auf Windows-Betriebssystemen installiert werden. Um Citavi auch auf anderen Plattformen nutzen zu können, kann Windows in einer virtuellen Maschine installiert werden. Hinweise, wie Citavi auf dem Mac genutzt werden kann, hält das Citavi-Handbuch bereit:\newline
+\url{https://www.citavi.com/sub/manual5/de/index.html}} Dabei ist jedoch zu beachten, dass eventuell vorhandene Angaben zu Affiliationen bei einer Konvertierung verloren gehen.
+
+Input-Dateien sollten in einem Unterorder \texttt{input-files} abgelegt werden, der im gleichen Ordner liegt wie das zu startende Python-Skript. Output-Dateien werden in einem Unterordner \texttt{output-files} abgespeichert. Daher müssen für diese Arbeitsordner sowohl Lese- als auch Schreibrechte vorhanden sein.
 
 \subsection{Handhabung des Skripts}
 \label{ownanalysis}
@@ -22,9 +22,10 @@ Um den Open-Access-Anteil bei Zeitschriftenartikeln mithilfe des Skripts zu anal
 
 \begin{enumerate}
 \item Abfrage in den gewünschten Datenbanken (Beschreibung vgl. S.~\pageref{Datenerhebung}~ff)
-\item \textit{DOAJ}-Daten herunterladen und vorbereiten (Beschreibung vgl. S.~\pageref{doaj})
+\item DOAJ-Daten herunterladen und vorbereiten (Beschreibung vgl. S.~\pageref{doaj})
 \item Im dritten Abschnitt des Skripts Namensvarianten für zu untersuchende Institutionen eintragen (Beschreibung vgl. S.~\pageref{inst-def}).
-\item \label{inputfiles} Dateien mit Ergebnissen aus Datenbankrecherchen und \textit{DOAJ}-Daten im gleichen Verzeichnis ablegen wie Skript.
+\item Zwei neue Unterordner \texttt{input-files} und \texttt{output-files} in dem Verzeichnis anlegen, in dem das Skript \texttt{main.py} abgelegt ist.
+\item \label{inputfiles} Dateien mit Ergebnissen aus Datenbankrecherchen und DOAJ-Daten in dem Unterordner \texttt{input-files} ablegen.
 \item Im ersten Abschnitt des Skripts gewünschte Funktionalitäten auswählen:
 	\begin{compactitem}
 	\item Datenauswertung (Statistik, Diagramme) 
@@ -37,32 +38,45 @@ Um den Open-Access-Anteil bei Zeitschriftenartikeln mithilfe des Skripts zu anal
 		\item \texttt{doReadIn = True}: beim ersten Starten des Skripts wählen, liest Daten aus Datenbankrecherchen etc. ein
         \item \texttt{doReadIn = False}: Funktionalität deaktivieren, um Daten aus Zwischenspeicher einzulesen (verkürzt Skriptlaufzeit)
 		\end{compactitem}
-    \item API-Abfragen 
+    \item Abfrage der Crossref-API
     	\begin{itemize}
 			\item \texttt{contactCR = 0}: Funktionalität deaktivieren
-            \item \texttt{contactCR = 1}: beim ersten Start des Skripts wählen, kontaktiert \textit{CrossRef}- und \textit{DOAJ}-API und fragt Informationen zu Lizenzen und ISSNs ab
+            \item \texttt{contactCR = 1}: beim ersten Start des Skripts wählen, kontaktiert Crossref-API und ergänzt fehlende ISSNs
             \item \texttt{contactCR = 2}: für wiederholtes Starten des Skripts wählen, liest Ergebnisse aus dem Zwischenspeicher ein (verkürzt Skriptlaufzeit)
 		\end{itemize}
+    \item Abfrage der Unpaywall-API
+    	\begin{itemize}
+			\item \texttt{contactOaDOI = 0}: Funktionalität deaktivieren
+            \item \texttt{contactOaDOI = 1}: beim ersten Start des Skripts wählen, kontaktiert Unpaywall-API und ermittelt OA-Artikel in Closed-Access-Zeitschriften (\texttt{hybrid}) bzw. frei zugängliche Versionen in Repositorien (\texttt{green}) 
+            \item \texttt{contactOaDOI = 2}: für wiederholtes Starten des Skripts wählen, liest Ergebnisse aus dem Zwischenspeicher ein (verkürzt Skriptlaufzeit)
+            \item \texttt{eMail = \$email}: für Abfrage der API (\texttt{contactOaDOI = 1}) eine gültige E-Mail-Adresse eintragen, über die der/die API-NutzerIn kontaktiert werden kann (Pflichtangabe)
+		\end{itemize} 
     \item Manuelle Prüfung Korrespondenzautorschaft
         \begin{compactitem}
 		\item \texttt{checkToDo = 0}: Funktionalität deaktivieren 
-        \item \texttt{checkToDo = 1}: beim ersten Starten des Skripts wählen, erstellt Datei \texttt{docstobeChecked.txt}
+        \item \texttt{checkToDo = 1}: beim ersten Starten des Skripts wählen, erstellt Datei \texttt{docsto beChecked.txt}
         \item \texttt{checkToDo = 2}: für wiederholtes Starten des Skripts wählen, liest Ergebnisse aus der manuell erstellten Datei \texttt{docsChecked.txt}
+		\end{compactitem}
+	\item Auswahl der relevanten Publikationsjahre (ist die Analyse für nur ein Jahr gewünscht, ist für beide Variablen das gleiche Jahr einzutragen)
+        \begin{compactitem}
+		\item \texttt{yearMin = \$year}: Startjahr des gewünschten Untersuchungszeitraumes eintragen 
+        \item \texttt{yearMax = \$year}: Endjahr des gewünschten Untersuchungszeitraumes eintragen
 		\end{compactitem}
 	\end{compactitem}
 \item \label{runscript} Skript in Python-Umgebung\footnote{Das Skript kann in einer Python-Programmierumgebung (IDE) (s. u.\,a. \url{https://wiki.python.org/moin/IntegratedDevelopmentEnvironments}) oder vom Terminal des Betriebssystems aus gestartet werden (s. u.\,a. \url{https://en.wikibooks.org/wiki/Python_Programming/Creating_Python_Programs}).} starten \newline
 (\texttt{doAnalysis = True}, \texttt{doReadIn = True}, \texttt{contactCR = 1}, \texttt{checkToDo = 1})
-\item Die Ausgabedatei \texttt{docstobechecked.txt} nachbereiten: Für alle Einträge in der Datei prüfen, ob für den Artikel die Korrespondenz- bzw. Erstautorschaft bei einer Autorin bzw. einem Autor der untersuchten Einrichtung(en) liegt. Ergebnisse in neuer Datei mit Dateinamen \texttt{docsChecked.txt} speichern und im gleichen Verzeichnis wie Skript ablegen (vgl. Beschreibung S.~\pageref{func-corr-author}). In der Datei \texttt{docsChecked.txt} %(UTF-8, tab-separiert) 
-muss jede Zeile einer Publikation entsprechen; die drei Spalten müssen den Titel, die DOI und die gefundene Namensvariante (in dieser Reihenfolge) enthalten.
+\item Die Ausgabedatei \texttt{docstobechecked.txt} nachbereiten: Für alle Einträge in der Datei prüfen, ob für den Artikel die Korrespondenz- bzw. Erstautorschaft bei einer Autorin bzw. einem Autor der untersuchten Einrichtung(en) liegt. Ergebnisse in neuer Datei mit Dateinamen \texttt{docsChecked.txt} speichern und im  Ordner \texttt{input-files} ablegen. In der Datei \texttt{docsChecked.txt} muss jede Zeile einer Publikation entsprechen; die drei Spalten müssen den Titel, die DOI und die gefundene Namensvariante (in dieser Reihenfolge) enthalten.\footnote{Es ist eine tab-separierte Textdatei in UTF-8-Kodierung ohne Kopfzeile (d.\,h. ohne Zeile für Spaltennamen) anzulegen; für nähere Beschreibung vgl. S.~\pageref{func-corr-author}.}
+
 \item \label{runscript2} Skript in Python-Umgebung starten \newline
 (\texttt{doAnalysis = True}, \texttt{doReadIn = False}, \texttt{contactCR = 2}, \texttt{checkToDo = 2})
-\item Ausgabedateien auswerten (Beschreibung der Ausgabedateien vgl. Abschnitt \textit{10. Statistik und Analyse} auf S.~\pageref{analyse} bzw. Übersicht der Dateien vgl. Anhang ab S.~\pageref{appendix})
+
+\item Ausgabedateien auswerten: Für eine Beschreibung der Ausgabedateien vgl. Abschnitt \textit{10. Statistik und Analyse} auf S.~\pageref{analyse}, für eine Übersicht der Dateien und Felder vgl. Anhang ab S.~\pageref{appendix}). Es wird empfohlen, die Daten vor der Auswertung zu bereinigen; entsprechende Empfehlungen finden sich in \ref{cleanupData} auf S.~\pageref{cleanupData}.
 \end{enumerate}
 
 \subsection{Abfrage der Datenbanken und Aufbereitung der Daten}
 \label{Datenerhebung}
 
-Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen Datenbanken durchgeführt werden können\footnote{Beispielabfragen sind für ein Jahr formuliert, aber das Skript kann mehrere Jahrgänge gleichzeitig verarbeiten. Die Beispiele sind (mit Ausnahme von \textit{TEMA}) dokumentiert für eine englischsprachige Oberfläche der jeweiligen Datenbanken.} und wie die Daten des \textit{DOAJ} aufbereitet werden müssen.
+Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen Datenbanken durchgeführt werden können\footnote{Beispielabfragen sind für ein Jahr formuliert, aber das Skript kann mehrere Jahrgänge gleichzeitig verarbeiten. Die Beispiele sind (mit Ausnahme von TEMA) dokumentiert für eine englischsprachige Oberfläche der jeweiligen Datenbanken.} und wie die Daten des DOAJ aufbereitet werden müssen.
 
 \label{used-DBs}
 %%%% EBSCO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -86,7 +100,6 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Send}
     \item Link in E-Mail öffnen und Datei abspeichern
 	\end{compactitem}
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
 \item Speichern: Dateiname \texttt{ebsco20xx.txt}
 \end{compactitem}
 
@@ -95,7 +108,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 \begin{compactitem}
 \item Suchabfrage (einfache Suche) via EBSCOhost (Anführungszeichen nutzen für exakte Suche!):
 	\begin{compactitem}
-	\item Beispiel: \texttt{AD ``tech* univ* berlin``  OR AD ``tu berlin`` OR AD ``berlin \newline inst* tech*``}
+	\item Beispiel: \texttt{AD "tech* univ* berlin"\ OR AD "tu berlin"\ OR AD "berlin \newline inst* tech*"}
 	\end{compactitem}
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
@@ -112,7 +125,6 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{RIS format}
     \item \texttt{Save}
 	\end{compactitem}
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
 \item Speichern: Dateiname \texttt{bsc20xx.txt}
 \end{compactitem}
 
@@ -136,24 +148,25 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Select Fields to Display: Complete Reference}
     \item \texttt{Export Citation(s)}
 	\end{compactitem}
-\item Datenexport wiederholen für alle vorhandenen Datensätze (\textit{OvidSP} erlaubt Herunterladen von max. 200 Datensätzen pro Durchgang -- ggf. abhängig von Lizenz)
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Dateien in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
+\item Datenexport wiederholen für alle vorhandenen Datensätze
+\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal und als erste Zeile übernehmen!)
 \item Speichern: Dateiname \texttt{cab20xx.txt}
 \end{compactitem}
 
-\pagebreak
+%\pagebreak
 %%%% CINAHL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Cumulative Index to Nursing \& Allied Health Literature (CINAHL)}
 \begin{compactitem}
 \item Suchabfrage (erweiterte Suche) via EBSCOhost: 
 	\begin{compactitem}
-	\item Beispiel: \texttt{AF tech* univ* berlin OR AF TU Berlin OR AF berlin inst* technol*}
+	\item Beispiel: \texttt{AF tech* univ* berlin OR AF TU Berlin OR AF berlin inst* \newline technol*}
 	\end{compactitem}
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
     \item Jahr
     \item Dokumententyp: \texttt{Publication Type = Academic Journals}
     \end{compactitem}
+\item Daten von MEDLINE von der Suche ausschließen
 \item Daten exportieren: 
 	\begin{compactitem}
 	\item \texttt{Share}
@@ -165,7 +178,6 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Direct Export in RIS format}
     \item \texttt{Save}
 	\end{compactitem}
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Dateien in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
 \item Speichern: Dateiname \texttt{cinahl20xx.txt}
 \end{compactitem}
 
@@ -179,7 +191,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
     \item Jahr
-    \item Dokumententyp: \texttt{Publication Type = Article, Review} (hierzu Filter über \texttt{Additional Limits} bzw. \texttt{Zusätzliche Eingrenzungen} auswählen)
+    \item Dokumententyp: \texttt{Publication Type = Article, Review} (hierzu Filter über \newline \texttt{Additional Limits} bzw. \texttt{Zusätzliche Eingrenzungen} auswählen)
     \end{compactitem}
 \item Daten exportieren: 
 	\begin{compactitem}
@@ -189,8 +201,8 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Select Fields to Display: Complete Reference}
     \item \texttt{Export Citation(s)} 
 	\end{compactitem}
-\item Datenexport wiederholen für alle vorhandenen Datensätze (\textit{OvidSP} erlaubt Herunterladen von max. 200 Datensätzen pro Durchgang -- ggf. abhängig von Lizenz)
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
+\item Datenexport wiederholen für alle vorhandenen Datensätze (OvidSP erlaubt Herunterladen von max. 200 Datensätzen pro Durchgang -- ggf. abhängig von Lizenz)
+\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal und als erste Zeile übernehmen!)
 \item Speichern: Dateiname \texttt{embase20xx.txt}
 \end{compactitem}
 
@@ -199,7 +211,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 \begin{compactitem}
 \item Suchabfrage (einfache Suche) via EBSCOhost:
 	\begin{compactitem}
-	\item Beispiel: \texttt{'tech* univ* berlin' (All text)}
+	\item Beispiel: \texttt{tech* univ* berlin (All text)}
 	\end{compactitem}
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
@@ -216,7 +228,6 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{RIS format}
     \item \texttt{Save}
 	\end{compactitem}
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
 \item Speichern: Dateiname \texttt{gf20xx.txt}
 \end{compactitem}
 
@@ -226,7 +237,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 %%\item Direktzugang Datenbank: \url{http://ieeexplore.ieee.org/Xplore/}
 \item Suchabfrage (Anführungszeichen nutzen für exakte Suche!):
 	\begin{compactitem}
-    \item Beispiel: \texttt{(((``Author Affiliations``: tech* univ* berlin) OR ``Author Affiliations``: ``TU Berlin``) OR ``Author Affiliations``: \newline``Berlin Inst* of technol*``)}
+    \item Beispiel: \texttt{((("{}Author Affiliations"{}: tech* univ* berlin) OR "{}Author \newline Affiliations"{}: "{}TU Berlin"{}) OR "{}Author Affiliations"{}: "{}Berlin Inst* of technol*"{})}
     \end{compactitem}
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
@@ -241,11 +252,10 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Output Format= RIS}
     \item \texttt{Download} 
 	\end{compactitem}
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
 \item Speichern: Dateiname \texttt{ieee20xx.txt}
 \end{compactitem}
 
-\pagebreak
+%\pagebreak
 
 %%%% InSpec %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{InSpec}
@@ -253,11 +263,11 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 %\item Direktzugang Datenbank: \url{http://www.isiknowledge.com/INSPEC}
 \item Suchabfrage: Namensvarianten für die eigene Institution (Anführungszeichen nutzen für exakte Suche!)  und Jahresangabe
 	\begin{compactitem}
-    \item Beispiel: \texttt{``tech* uni* berlin``  OR ``TU Berlin`` (Address) and 2014 (year)}
+    \item Beispiel: \texttt{"{}tech* uni* berlin"{}  OR "{}TU Berlin"{} (Address) and 2014 (year)}
     \end{compactitem}
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
-    \item Dokumententyp: \texttt{document type = 'journal paper'}, dabei \texttt{'conference paper'} explizit ausschließen!
+    \item Dokumententyp: \texttt{document type = "{}journal paper"{}}, dabei \texttt{"{}conference paper"{}} explizit ausschließen!
     \end{compactitem}
 \item Daten exportieren: 
 	\begin{compactitem}
@@ -266,8 +276,8 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Record Content = Full Record}
     \item \texttt{File Format = Tab-delimited (Win, UTF-8)}
 	\end{compactitem}
-\item Datenexport wiederholen für alle vorhandenen Datensätze (\textit{InSpec} erlaubt Herunterladen von max. 500 Einträgen pro Durchgang)
-\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal übernehmen!)
+\item Datenexport wiederholen für alle vorhandenen Datensätze (InSpec erlaubt Herunterladen von max. 500 Einträgen pro Durchgang)
+\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal und als erste Zeile übernehmen!)
 \item Speichern: Dateiname \texttt{inspec20xx.txt}
 \end{compactitem}
 
@@ -276,7 +286,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 \begin{compactitem}
 \item Suchabfrage (erweiterte Suche) via ProQuest: 
 	\begin{compactitem}
-	\item Beispiel: \texttt{(ea(tu-berlin.de) OR af(Techn* berlin)) AND rtype.exact\newline("'Article"' OR "'Journal Article"') AND pd(2014)}
+	\item Beispiel: \texttt{(ea(tu-berlin.de) OR af(Techn* berlin)) AND rtype.exact\newline("{}Article"{} OR "{}Journal Article"{}) AND pd(2014)}
 	\end{compactitem}
 \item Daten exportieren: 
 \begin{compactitem}
@@ -287,7 +297,6 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Continue}
     \item Speichern
 	\end{compactitem}
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
 \item Speichern: Dateiname \texttt{lisa20xx.txt}
 \end{compactitem}
 
@@ -297,7 +306,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 %\item Direktzugang Datenbank: \url{http://search.proquest.com}
 \item Suchabfrage (erweiterte Suche):
 	\begin{compactitem}
-    \item Beispiel: \texttt{'au(tech* univ* berlin) OR au(TU Berlin)'}
+    \item Beispiel: \texttt{au(tech* univ* berlin) OR au(TU Berlin)}
     \end{compactitem}
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
@@ -313,7 +322,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Continue}
     \item Speichern
 	\end{compactitem}
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
+\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal und als erste Zeile übernehmen!)
 \item Speichern: Dateinamen \texttt{pq20xx.txt}
 \end{compactitem}
 
@@ -323,7 +332,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 %\item Direktzugang Datenbank: \url{http://www.ncbi.nlm.nih.gov/pubmed/}
 \item Suchabfrage: Namensvariante für die eigene Institution (Anführungszeichen nutzen für exakte Suche!) und Jahr 
 	\begin{compactitem}
-    \item Beispiel: \texttt{(((((``Technische Universitat Berlin`` [Affiliation]) OR \newline ``TU Berlin`` [Affiliation]) OR ``Tech Univ Berlin`` [Affiliation]) \newline OR ``Berlin Institute of Technology`` [Affiliation]) OR ``Berlin \newline Inst* Technol*`` [Affiliation]) AND (``2014/01/01`` [Date - Pub-\newline lication] : ``2014/12/31`` [Date - Publication])}
+    \item Beispiel: \texttt{((((("{}Technische Universitat Berlin"{} [Affiliation]) OR \newline "{}TU Berlin"{} [Affiliation]) OR "{}Tech Univ Berlin"{} [Affiliation]) \newline OR "{}Berlin Institute of Technology"{} [Affiliation]) OR "{}Berlin \newline Inst* Technol*"{} [Affiliation]) AND ("{}2014/01/01"{} [Date - Pub-\newline lication] : "{}2014/12/31"{} [Date - Publication])}
     \end{compactitem}
 \item Daten exportieren: 
 	\begin{compactitem}
@@ -339,7 +348,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 %\item Direktzugang Datenbank: \url{https://scifinder.cas.org/scifinder/}
 \item Suchabfrage:
 	\begin{compactitem}
-    \item Beispiel: \texttt{'tech univ berlin' (company)}
+    \item Beispiel: \texttt{"{}tech univ berlin"{} (company)}
     \end{compactitem}
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
@@ -347,7 +356,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item Dokumententyp: \texttt{document type = journal or review}
     \item Datenbank: \texttt{database = CAPLUS}
     \end{compactitem}
-\item Dubletten entfernen: \texttt{'Tools: remove duplicates'}
+\item Dubletten entfernen: \texttt{Tools: remove duplicates}
 \item Daten exportieren: 
 	\begin{compactitem}
     \item \texttt{Export}
@@ -356,8 +365,8 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Details: Quote Character: "}
     \item \texttt{Delimiter: tab-separiert}
     \end{compactitem}
-\item Datenexport wiederholen für alle vorhandenen Datensätze (\textit{SciFinder} erlaubt Herunterladen von max. 100 Einträgen pro Durchgang)
-\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal übernehmen!)
+\item Datenexport wiederholen für alle vorhandenen Datensätze (SciFinder erlaubt Herunterladen von max. 100 Einträgen pro Durchgang)
+\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal und als erste Zeile übernehmen!)
 \item Speichern: Dateiname \texttt{sf20xx.txt}
 \end{compactitem}
 
@@ -376,8 +385,8 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Choose the information to export: All available information}
     \item \texttt{Export}
 	\end{compactitem}
-\item Datenexport wiederholen für alle vorhandenen Datensätze (\textit{Scopus} erlaubt Herunterladen von max. 2000 Datensätzen pro Durchgang)
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
+\item Datenexport wiederholen für alle vorhandenen Datensätze (Scopus erlaubt Herunterladen von max. 2000 Datensätzen pro Durchgang)
+\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal und als erste Zeile übernehmen!)
 \item Speichern: Dateiname \texttt{scopus20xx.txt}
 \end{compactitem}
 
@@ -403,7 +412,6 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{RIS format}
     \item \texttt{Save}
 	\end{compactitem}
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Datei in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
 \item Speichern: Dateiname \texttt{sd20xx.txt}
 \end{compactitem}
 
@@ -412,7 +420,7 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
 \begin{compactitem}
 \item Suchabfrage: Namensvariante für die eigene Institution (Anführungszeichen nutzen für exakte Suche!) und Jahr
 	\begin{compactitem}
-    \item Beispiel: \texttt{``TU Berlin`` (Institution), 2014 (Jahr)}
+    \item Beispiel: \texttt{"{}TU Berlin"{} (Institution), 2014 (Jahr)}
     \end{compactitem}
 \item Suchergebnisse filtern nach
 	\begin{compactitem}
@@ -426,8 +434,8 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Alle auswählen}
     \item \texttt{Auswahl als RIS speichern}
     \end{compactitem}
-\item Datenexport wiederholen für alle vorhandenen Datensätze (\textit{TEMA} erlaubt Herunterladen von max. 100 Einträgen pro Durchgang)
-\item RIS umformatieren in \textit{WoS}-Format: RIS-Dateien in \textit{Citavi} importieren, alle Einträge exportieren in \textit{WoS}-Format
+\item Datenexport wiederholen für alle vorhandenen Datensätze (TEMA erlaubt Herunterladen von max. 100 Einträgen pro Durchgang)
+\item alle Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal und als erste Zeile übernehmen!)
 \item Speichern: Dateiname \texttt{tema20xx.txt}
 \end{compactitem}
 
@@ -450,14 +458,52 @@ Im Folgenden wird jeweils ein Weg beschrieben, wie die Abfragen in den einzelnen
     \item \texttt{Record Content = Full Record}
     \item \texttt{File Format = Tab-delimited (Win, UTF-8)}
 	\end{compactitem}
-\item Datenexport wiederholen für alle vorhandenen Datensätze (\textit{WoS} erlaubt Herunterladen von max. 500 Einträgen pro Durchgang)
-\item Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal übernehmen!)
+\item Datenexport wiederholen für alle vorhandenen Datensätze (WOS erlaubt Herunterladen von max. 500 Einträgen pro Durchgang)
+\item Ergebnisse in \textit{eine} Datei kopieren (Spaltennamen der Einzeldateien nur einmal und als erste Zeile übernehmen!)
 \item Speichern: Dateiname \texttt{wos20xx.txt}
 \end{compactitem}
 
 \subsection*{DOAJ} 
 \label{doaj}
 
-Das \textit{DOAJ} stellt seine Daten zur Weiternutzung zur Verfügung, so kann u.\,a. eine CSV-Datei heruntergeladen werden: \url{https://doaj.org/faq#metadata}. 
+Das DOAJ stellt seine Daten zur Weiternutzung zur Verfügung (vgl. Hinweise unter \url{https://doaj.org/faq#metadata}), so kann u.\,a. eine CSV-Datei heruntergeladen werden: \url{https://doaj.org/csv}. 
 
-Damit die CSV-Datei vom Skript verarbeitet werden kann, muss sie unter dem Namen \texttt{doaj.txt} als tab-separierte Textdatei mit der Kodierung UTF-8 im selben Verzeichnis wie das Skript und die anderen einzulesenden Dateien abgespeichert werden.
+Damit die CSV-Datei vom Skript verarbeitet werden kann, muss sie unter dem Namen \texttt{doaj.txt} als tab-separierte Textdatei mit der Kodierung UTF-8 abgespeichert und in dem Unterordner \texttt{input-files} abgelegt werden. Die Umformatierung von comma-separiert in tab-separiert kann z.\,B. in MS Excel erfolgen; dabei ist zu beachten, dass die UTF-8-Kodierung nicht verändert werden darf. Beim Einlesen der CSV-Daten ist zudem darauf zu achten, dass die Spalten für ISSN und eISSN als \texttt{Text} eingelesen werden müssen, damit die Zeichenketten nicht irrtümlich als Datumsangaben interpretiert und in der Zeichenfolge verändert werden.
+
+\subsection{Datenbereinigung} 
+\label{cleanupData}
+
+Automatisierte Auswertungen sind nur so gut wie die zugrundeliegenden Daten. Um die Datenqualität zu erhöhen, empfiehlt sich eine nachträgliche Bearbeitung der Datei \texttt{allPubs.txt}. Die Bearbeitung kann in einem Texteditor oder Tabellenkalkulationsprogramm erfolgen. Empfohlen wird jedoch die Verwendung der Open-Source-Software OpenRefine\footnote{OpenRefine ist für Windows, Mac und Linux verfügbar, Download unter \url{http://openrefine.org/download.html}. Es gibt zahlreiche Tutorials zur Verwendung online, vgl. etwa \url{https://github.com/OpenRefine/OpenRefine/wiki/Recipes}.}.
+
+\paragraph{Fehlerhafte DOIs} Mitunter werden in den Datenbanken fehlerhafte DOIs gelistet. Es kann sich dabei um einfache Schreibfehler handeln (fehlende Zeichen, vertauschte Zeichen) oder auf Probleme bei der DOI-Registrierung zurückgehen. Die DOIs sollten manuell überprüft und ggf. korrigiert werden. Im Folgenden kann etwa Unpaywall erneut abgefragt werden, um weitere OA-Artikel zu identifizieren.
+
+\paragraph{Identifikation weiterer OA-Artikel} Mitunter findet Unpaywall mehrere OA-Versionen eines Artikels; alle OA-Versionen werden in dem Feld \texttt{oa\_locations} angegeben. Die laut Unpaywall "`beste"' OA-Version wird zusätzlich in dem separaten Feld \texttt{best\_oa\_location} angegeben. Das Python-Skript wertet lediglich die Angaben in diesem Feld \texttt{best\_oa\_location} aus und wertet in der Ausgabedatei solche Artikel als \texttt{hybrid}, für die die folgenden Parameter zutreffen:
+\begin{ttfamily}
+\begin{compactitem}
+\item oaDOI[is\_oa] = True
+\item oaDOI[journal\_is\_oa] = False
+\item oaDOI[host\_type] = publisher
+\item oaDOI[license] = 'cc'
+\end{compactitem}
+\end{ttfamily}
+Ist ein Artikel zwar über die Verlagswebseite frei verfügbar, steht aber nicht unter einer Creative-Commons-Lizenz, wird er von dem Skript nicht als OA gewertet. Parallel dazu könnte auch eine ("`grüne"') OA-Version über ein Repositorium verfügbar sein. Dies wird in dem Skript momentan nicht berücksichtigt. Diese Artikel können in den Daten durch folgende Filter identifiziert werden, für die weitere Unpaywall-Abfragen durchgeführt werden könnten\footnote{Mithilfe von OpenRefine kann dies sehr einfach erfolgen, vgl. die Anleitung \textit{Collecting Open Access information using OpenRefine and the
+oaDOI API (special bonus: the DOAJ API)} (\url{http://www.libraryworkflowexchange.org/wp-content/uploads/2017/07/Collecting-Open-Access-information-using-OpenRefine-and-the-oaDOI-API.pdf}).}:
+
+\begin{ttfamily}
+\begin{compactitem}
+\item OA-Status = None
+\item oaDOI[is\_oa] = True
+\item oaDOI[journal\_is\_oa] = False
+\item oaDOI[host\_type] = publisher
+\end{compactitem}
+\end{ttfamily}
+
+Neben zusätzlichen "`grünen"' Artikeln können auch weitere "`hybride"' Artikel durch manuelle Prüfung ermittelt werden: Einige Verlage exponieren Lizenzangaben nur eingeschränkt oder gar nicht maschinenlesbar.\footnote{D.\,h. einige Verlage geben weder auf der eigenen Webseite die Lizenz in einem maschinenlesbaren Format (z.\,B. als Meta-Element im HTML-Header oder als RDFa-Element bei Angabe der Lizenz auf der Seite) noch in den Crossref-Metadaten an. Die freie Lizenz kann in solchen Fällen lediglich über HTML-Scraping automatisch identifiziert werden.} Bei der eigenen Datenanalyse zeichnete sich die Tendenz ab, dass sich für folgende Verlage eine manuelle Prüfung der Lizenz dann lohnt, wenn in den Unpaywall-Daten als Lizenzhinweis \texttt{implied OA} enthalten ist: Royal Society of Chemistry\footnote{RSC exponiert sehr wohl die Lizenz-URL in den Crossref-Metadaten, allerdings in dem nicht-kanonischen Feld \texttt{assertion} (statt in dem dafür vorgesehen Feld \texttt{license}. Die Überprüfung könnte also automatisiert werden, indem die Crossref-Schnittstelle abgefragt und der Inhalt des Feldes \texttt{assertion} analysiert wird.}, Oxford University Press, Cambridge University Press, Institute of Mathematical Statistics. Für die manuelle Verifizierung kann entweder die Datei \texttt{allPubs.txt} (Feld: \texttt{oaDOI[license]}) oder die Datei \texttt{oaDOI-response.txt} (Feld: \texttt{license}) herangezogen werden.
+
+\paragraph{Verifizierung der identifizierten Institutionen} Enthalten die Datenbankdaten in den Affiliationsangaben mehrere Einträge (z.\,B. bei geteilter Korrespondenzautorschaft), kann es leicht zu \textit{false positives} kommen. Enthält das Affiliationsfeld bspw. die Angaben \texttt{FU Berlin} und \texttt{Tech Univ Dresden}, werden vom Skript mit den momentanen Namensvarianten fälschlicherweise die FU Berlin und TU Berlin als Institutionen der KorrespondenzautorInnen erkannt. Es empfiehlt sich daher, die Artikel manuell zu überprüfen für die in der Spalte \texttt{found name variant} mehrere Einträge (durch Semikolon getrennt) aufgeführt werden. Sollen nicht nur Affiliationsangaben für die Korrespondenzautor*innen, sondern für alle Autorinnen und Autoren ausgewertet werden, sollten auch die Mehrfacheinträge in der Spalte \texttt{all identified name variants} überprüft werden. 
+
+\paragraph{Identifikation von weiteren Artikeln mit Korrespondenzautorschaft} Die Korrespondenzautorschaft wird auf Basis der im dritten Abschnitt des Skripts angelegten Namensvarianten identifiziert. Die Spalte \texttt{corresponding author} (bzw. \texttt{affiliations} für die vorhandenen Affiliationsangaben aller Autorinnen und Autoren) könnte nach weiteren Namensvarianten (inkl. üblicher Schreibfehler) durchsucht werden. Es empfiehlt sich zudem die Suche nach der E-Mail-Domain der jeweiligen Einrichtung in der Spalte \texttt{email}.
+
+\paragraph{Dublettencheck} Der Dublettencheck erfolgt in dem Skript auf Basis von DOIs bzw. Angaben zu Autor/Titel (vgl. Hinweise unter \ref{func-duplicates} auf S.~\pageref{func-duplicates} bzw. \ref{potentialErrors} auf S.~\pageref{potentialErrors}). Eine vollständige Dublettenerkennung ist unwahrscheinlich. Mithilfe von OpenRefine könnten potentielle Dubletten mithilfe einer Facette\footnote{Zur Umsetzung vgl. den Eintrag \textit{How do I find duplicates in a column?} unter \url{https://github.com/OpenRefine/OpenRefine/wiki/FAQ}.} aufgerufen, manuell überprüft und ggf. gelöscht werden.
+
+\paragraph{Vereinheitlichung Verlage und Journale} In den Datenbanken sind mitunter verschiedene Varianten für Journale und Verlage hinterlegt. Will man eine statistische Auswertung nach Verlagen und/oder Journalen vornehmen (z.\,B. Verteilung auf Verlage, Anzahl Journale insgesamt, usw.), sollten diese Angaben vereinheitlicht werden.
