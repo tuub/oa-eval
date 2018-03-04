@@ -1,15 +1,14 @@
 # Share of open access journal articles
-We want to analyse an institution's publication output and determine the share of open access articles. To do so we retrieve data from different bibliographic databases and match it with data from the Directory of Open Access Journals (DOAJ) to identify OA articles in OA jouranls.
-The python script described here analyses the retrieved data and produces both total numbers and a list of articles as downloadable files. To identify OA articles in hybrid journals the CrossRef API is called. 
-Results on OA articles in OA journals and in hybrid journals are treated separatedly.
+We want to analyse an institution's publication output and determine the share of open access articles. To do so we retrieve data from different bibliographic databases and match it with data from the Directory of Open Access Journals (DOAJ) and Unpaywall to identify OA articles in OA jouranls.
+The python script described here analyses the retrieved data and produces both total numbers and a list of articles as downloadable files. To identify OA articles in hybrid journals and green OA articles in repositories the Unpaywall API is called. 
 
 ## Project description
-The python scripts analyses article data and identifies those articles that were published in a) gold open access journals and b) hybrid journals. 
+The python scripts analyses article data and identifies those articles that were published in a) gold open access journals, b) hybrid journals, and c) repositories as green OA. 
 The script DOES aggregate, normalise and duplicate check for article data. The script outputs different files (tab-separated txt) for further analysis.
 The script DOES NOT retrieve article data from databases -- this has to be done beforehand! Instructions for retrieval of article data are included in the (German) manual.
 
 ## How to
-See further information on input/output files and the most important script variables [here](/file-var-info.md).
+See the manual further information on input/output files and the most important script variables.
 
 A full manual in German is available as [PDF file](/manual.pdf) and [LaTeX project](/manual-tex). See the manual for information on
 * how to retrieve article data from different databases (e.g. Web of Science, SciFinder, PubMed),
