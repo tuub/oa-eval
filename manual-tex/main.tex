@@ -1,0 +1,101 @@
+\documentclass[a4paper,11pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage{lmodern}
+\usepackage{gentium}
+\usepackage{eurosym}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{paralist}
+\usepackage[affil-it]{authblk}
+\usepackage[pdfa,bookmarksopen=true]{hyperref}
+\urlstyle{same} %url not monospace
+\usepackage{hyperxmp}
+\usepackage[ngerman]{babel}
+\usepackage[titletoc,toc,page]{appendix}
+\renewcommand\appendixname{Anhang}
+\renewcommand\appendixpagename{Anhang}
+\renewcommand\appendixtocname{Anhang}
+\usepackage{tabularx,booktabs}
+\usepackage{ccicons}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+
+
+% typo setup
+\clubpenalty = 10000
+\widowpenalty = 10000
+\displaywidowpenalty = 10000
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0em}
+\setcounter{tocdepth}{2}
+
+\usepackage[]{fancyvrb}
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{xleftmargin=.45in}
+
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[C]{\small \nouppercase \leftmark}
+\fancyfoot[C]{\small \thepage}
+
+%Embed color scheme (for PDF/A compliancy)
+\immediate\pdfobj stream attr{/N 3} file{sRGB_IEC61966-2-1_black_scaled.icc}
+\edef\OBJ@RVT{\the\pdflastobj}
+\pdfcatalog{%
+/OutputIntents [ <<
+/Type /OutputIntent
+/S/GTS_PDFA1
+/DestOutputProfile \OBJ@RVT\space 0 R
+/OutputConditionIdentifier (sRGB_IEC61966-2-1_black_scaled)
+/Info(sRGB_IEC61966-2-1_black_scaled)
+ >> ]}
+ 
+%Embed metadata
+\hypersetup{%
+      pdftitle={Analyse des Open-Access-Anteils bei Zeitschriftenartikeln: Anleitung und Dokumentation eines Python-Skripts},
+      pdfauthor={Eva Bunge, Michaela Voigt},
+      pdfcopyright={CC BY 4.0},
+      pdfsubject={Open-Access-Anteil von Zeitschriftenveröffentlichungen ermitteln},
+      pdfkeywords={Anleitung, Dokumentation, Publikationsaufkommen, Python, Skript, Open Access, Open-Access-Zeitschriften, Hybridzeitschriften, Gold OA, Hybrid OA, manual, documentation, publication output, open access share, script, open access journals, hybrid journals},
+      pdflicenseurl={http://creativecommons.org/licenses/by/4.0/},
+      pdfcontacturl={https://github.com/tuub/oa-eval},
+      baseurl={https://github.com/tuub/oa-eval},
+      pdflang={de}
+     }
+
+%Embed fonts
+\input glyphtounicode.tex
+\input glyphtounicode-cmr.tex
+\pdfgentounicode=1
+\pdfobjcompresslevel=0
+\pdfinclusioncopyfonts=1
+
+\makeatletter
+\let\@fnsymbol\@roman
+\makeatother
+
+\title{\Large Analyse des Open-Access-Anteils bei Zeitschriftenartikeln: Anleitung und Dokumentation eines Python-Skripts}
+
+\author{\normalsize
+Eva Bunge\thanks{Deutsches Museum, Bibliothek, ORCiD: \href{http://orcid.org/0000-0002-5587-5934}{0000-0002-5587-5934}} , 
+Michaela Voigt\thanks{TU Berlin, Universitätsbibliothek, ORCiD: \href{http://orcid.org/0000-0001-9486-3189}{0000-0001-9486-3189}}}
+
+\date{\normalsize Stand: \today}
+
+\begin{document}
+\maketitle
+Das Python-Skript (BSD 3-Clause) und die vorliegende Anleitung (CC BY 4.0) sind online über das GitHub-Konto der Universitätsbibliothek der TU Berlin verfügbar:\newline \url{https://github.com/tuub/oa-eval}
+
+\ccLogo \ccAttribution\ Dieses Material steht unter der Creative-Commons-Lizenz Namensnennung 4.0 Inter\-national, Lizenztext s. \url{https://creativecommons.org/licenses/by/4.0/}.
+
+\tableofcontents
+\pagebreak
+
+\pagestyle{fancy}
+%\pagestyle{headings}
+\include{hintergrund}
+\include{funktionsweise}
+\include{analyse}
+\include{appendix}
+
+\end{document}

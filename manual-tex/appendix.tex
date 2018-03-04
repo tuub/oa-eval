@@ -1,0 +1,127 @@
+% !TEX root = main.tex
+\clearpage
+\begin{appendices}
+\label{appendix}
+%\subsection*{Übersicht Skriptdateien}
+\begin{table}[h]
+\caption{Übersicht der einzelnen Skriptdateien}
+    \begin{tabularx}{1\textwidth}{p{5cm}p{9cm}}
+    \toprule
+     Skriptdatei & Erläuterung \\
+     \midrule
+main.py & Hauptskript\\
+RIS-fields.csv & Übersicht RIS-Felder der verschiedenen Datenbanken\\
+%
+    \bottomrule
+    \end{tabularx}
+%\caption{Übersicht der einzelnen Skriptdateien}
+\end{table}
+
+%\subsection*{Übersicht Eingabedateien}
+\begin{table}[h]
+\caption{Übersicht der vom Skript einzulesenden Dateien (Unterordner \texttt{input-files})}
+    \begin{tabularx}{1\textwidth}{p{5cm}p{9cm}}
+    \toprule
+     Eingabedatei & Erläuterung \\
+     \midrule
+     docsChecked.txt & Publikationen, für die Affiliation der Erst- bzw. Korrespondenzautorschaft manuell geprüft wurde \\
+    doaj.txt & DOAJ-Metadaten \\
+    \midrule
+    bsc20xx.txt & Artikeldaten Business Source Complete \\
+    cab20xx.txt & Artikeldaten CAB Abstracts \\
+    cinahl20xx.txt & Artikeldaten CINHAL \\
+    ebsco20xx.txt & Artikeldaten Academic Search Premier (EBSCO) \\
+    embase20xx.txt & Artikeldaten Embase \\
+    gf20xx.txt & Artikeldaten GeoRef \\
+    ieee20xx.txt & Artikeldaten IEEE Xplore \\
+    inspec20xx.txt & Artikeldaten InSpec \\
+    lisa20xx.txt & Artikeldaten LISA \\
+    pq20xx.txt & Artikeldaten ProQuest Social Sciences \\
+    pubmed20xx.txt & Artikeldaten PubMed \\
+    scopus20xx.txt & Artikeldaten Scopus \\
+    sd20xx.txt & Artikeldaten Sport Discus \\
+    sf20xx.txt & Artikeldaten SciFinder \\
+    tema20xx.txt & Artikeldaten TEMA \\
+    wos20xx.txt & Artikeldaten Web of Science \\
+    \bottomrule
+    \end{tabularx}
+%\caption{Übersicht der vom Skript einzulesenden Dateien}
+\end{table}
+
+%\subsection*{Übersicht Skriptvariablen}
+\begin{table}[h]
+\caption{Übersicht der wichtigsten im Skript verwendeten Variablen}
+    \begin{tabularx}{1\textwidth}{p{5cm}p{9cm}}
+    \toprule
+     Variable im Skript & Erläuterung \\
+     \midrule
+checkToDo & Skriptfunktionalität (de-)aktivieren: manuelle Prüfung Erst-/Korrespondenzautorschaft\\
+contactCR & Skriptfunktionalität (de-)aktivieren: Abfragen der API von Crossref \\
+contactOaDOI & Skriptfunktionalität (de-)aktivieren: Abfragen der API von Unpaywall \\
+doAnalysis & Skriptfunktionalität (de-)aktivieren: Datenauswertung (Statistik, Diagramme)\\
+doReadIn & Skriptfunktionalität (de-)aktivieren: Einlesen Artikeldaten aus Datenbankrecherchen\\
+finalList & Liste aller gefundenen Artikel\\
+yearMin & Start des Untersuchungszeitraums; es ist das Jahr mit vier Stellen anzugeben (relevant für korrekte Erkennung der PubMed-Daten)\\
+yearMax & Ende des Untersuchungszeitraums, es ist das Jahr  mit vier Stellen anzugeben (relevant für korrekte Erkennung der PubMed-Daten)\\
+    \bottomrule
+    \end{tabularx}
+\end{table}
+
+%\subsection*{Übersicht Ausgabedateien}
+\begin{table}[h]
+\caption{Übersicht der vom Skript ausgegebenen Dateien (Unterordner \texttt{output-files})}
+    \begin{tabularx}{1\textwidth}{p{5cm}p{9cm}}
+    \toprule
+     Ausgabedatei & Erläuterung \\
+     \midrule
+    allPubs.txt & Liste aller gefundenen Artikel \\
+    docsCheckedCantFind.txt & Hilfsdatei, wird nur dann erstellt, wenn beim Einlesen der Datei \texttt{docsChecked.txt} ein Fehler auftritt. (z.\,B. aufgrund eines Copy/Paste-Fehlers bei der Erstellung der txt-Datei) \\
+    %
+    docsToBeChecked.txt & Liste der Publikationen, für die Affiliation der Erst- bzw. Korrespondenzautorschaft manuell zu prüfen ist \\
+    finalList & interne Arbeitsdatei aller Artikeldaten \\
+    oaDOI-response.txt & Werte aus Unpaywall-Schnittstelle  \\
+    %
+    statistics\_OA.txt & Statistik der analysierten Artikel \\
+    statistics\_goldPublishers.txt & Häufigkeitsverteilung der Gold-Artikel (OA-Artikel in OA-Zeitschriften) auf Verlage \\
+	DOIs-oaDOI-error.txt & Liste der DOIs, für die Unpaywall eine Fehlermeldung zurückgegeben hat \\
+	\bottomrule
+    \end{tabularx}
+\end{table}
+
+\begin{table}[h] \small
+\caption{Angaben in allPubs.txt} \label{tab:art-data}
+    \begin{tabularx}{1\textwidth}{p{3cm}p{2.5cm}p{8cm}} 
+    \toprule
+     Feld & Quelle(n) & Erläuterung \\
+     \midrule
+	authors & Datenbanken & Angaben gekürzt auf max. 2500 Zeichen \\
+ 	title & Datenbanken & \\
+	OA-Status & DOAJ, Unpaywall & Angaben, über welchen Weg Artikel OA verfügbar ist (\texttt{None}, \texttt{gold}, \texttt{hybrid} oder \texttt{green}) \\
+	DOI & Datenbanken & \\
+ 	journal & Datenbanken &  \\
+	ISSN & Datenbanken, Crossref & ISSN der Print- oder Onlineausgabe (wahrscheinlich Print)\\
+	eISSN & Datenbanken, Crossref & ISSN der Print- oder Onlineausgabe (wahrscheinlich Online)\\
+	publisher & Datenbanken, DOAJ, \mbox{Unpaywall} & für OA-Artikel werden ursprüngliche Angaben zwecks Vereinheitlichung überschrieben\\
+	year & Datenbanken & PubMed indiziert verschiedene Daten: PubMed-Suche deckt alle Datumsfelder ab, während das Python-Skript nur ein Datumsfeld auswertet (\texttt{DP = Date of Publication})\\
+	affiliations & Datenbanken & Affiliationen der Autorinnen und Autoren\\
+	all identified name variants & Skript & Institutionskürzel für alle vorhandenen Affiliationen, auf Basis der im Skript angesetzten Institutionsnamen zugeordnet wurden \\
+	corresponding author & Datenbanken & Affilation der Korrespondenzautorin bzw. des Korrespondenzautors\\
+	found name variant & Skript, ggf. manuell & Institutionskürzel für Affiliation der  Korrespondenzautorschaft, das auf Basis der im Skript angesetzten Institutionsnamen zugeordnet wurde\\
+	e-mail & Datenbanken & \\
+	subject & Datenbanken & Angaben aus Web of Science, SciFinder \\
+	DOAJ subject & DOAJ & im DOAJ werden Zeitschriften nach der Library of Congress Classification klassifiziert\\
+	funding & Datenbanken & Angaben aus Web of Science \\
+	license & DOAJ, Unpaywall & Standardlizenz für Journal laut DOAJ bzw. Lizenzangabe für Artikel aus Unpaywall \\
+	databaseID & Skript & \\
+	notes & Skript & verschiedene Indikatoren für Datenquellen: \newline \texttt{Checked by hand.} = Affiliation für Korrespondenzautorschaft manuell ermittelt; \newline \texttt{Identified via DOAJ} = OA-Status ermittelt mithilfe von DOAJ; \newline \texttt{Identified via Unpaywall} = OA-Status ermittelt mithilfe von Unpaywall\\
+    oaDOI[is\_oa] & Unpaywall & \texttt{True} = Artikel ist OA verfügbar \\
+    oaDOI[journal\_is\_oa] & Unpaywall & \texttt{True} = Journal ist OA-Zeitschrift \\
+    oaDOI[host\_type] & Unpaywall & primäre OA-Version verfügbar über Verlag (\texttt{publisher}) oder gesichertes Repositorium (\texttt{repository})\\
+    oaDOI[license] & Unpaywall & \\
+    APC Amount & DOAJ & \\
+    APC Currency & DOAJ & \\
+	\bottomrule
+    \end{tabularx}
+\end{table}
+
+\end{appendices}
