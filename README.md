@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/68797013.svg)](https://zenodo.org/badge/latestdoi/68797013)
+
 # Share of open access journal articles
 We want to analyse an institution's publication output and determine the share of open access articles. To do so we retrieve data from different bibliographic databases and match it with data from the Directory of Open Access Journals (DOAJ) and Unpaywall to identify OA articles in OA jouranls.
 The python script described here analyses the retrieved data and produces both total numbers and a list of articles as downloadable files. To identify OA articles in hybrid journals and green OA articles in repositories the Unpaywall API is called. 
