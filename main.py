@@ -65,7 +65,7 @@ yearMin = 2016
 yearMax = 2016
 
 # Enter your email here. It's needed to contact Unpaywall
-eMail = '?email=test@example.com'
+myEMail = 'test@example.com'
 
 
 # ----------------- 2. Setting up Classes and Functions -----------------------
@@ -254,7 +254,7 @@ def askOaDOI(needInfo):
     for doc in needInfo:
         doi = doc.DOI
         replies[i][0] = doi
-        myurl = baseurl + doi + eMail
+        myurl = baseurl + doi + '?email=' + myEMail
         try:
             response = urllib2.urlopen(myurl)
             response = json.load(response)
@@ -282,10 +282,11 @@ def askOaDOI(needInfo):
             doc.oaDOI3 = str(replies[i][3])
             doc.oaDOI4 = str(replies[i][4])
             doc.lizenz = str(replies[i][4])
+            replies[i][5] = replies[i][5].encode('utf-8')
             doc.publisher = str(replies[i][5])
             replies[i][6] = doc.oaStatus
         except urllib2.HTTPError, err:
-            fehler = "Sorry, something went wrong with Unpaywall (HTTP Error)."
+            fehler = "Sorry, Unpaywall doesn't know this DOI (HTTP Error)."
             print 'DOI ', doi, ': ', fehler
             errDOIs += [doi]
         i += 1
@@ -801,7 +802,7 @@ if doReadIn == True:
                 contentWoS.append(Document(fields[1], fields[8], fields[54],
                                  fields[9], fields[38], fields[39], fields[35],
                                  fields[44], fields[22], fields[23],
-                                 fields[24], fields[58], fields[27],
+                                 fields[24], fields[59], fields[27],
                                  dbWoS.idNummer))
             else:
                 ic += 1
