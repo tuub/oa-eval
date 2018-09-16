@@ -494,25 +494,19 @@ def risFormat(risRecords, ind):
                             setattr(newDoc, ab, int(line[6:10]))
                         
                         # affiliations
-                        elif ab == 'affiliations' and ind in [4, 7, 10, 11, 12]:
+                        elif ab == 'affiliations' and ind in [4, 10, 11, 12]:
                             setattr(newDoc, ab, textL)
                             setattr(newDoc, 'corrAuth',
                                     getattr(newDoc, 'corrAuth') + "; " + textL)
-                        # Embase
-                        elif ab == 'affiliations' and ind == 14:
-                            if getattr(newDoc, 'corrAuth') == None:
-                                t1 = getattr(newDoc, 'authors')
-                                p1 = t1.find('; ')
-                                if p1 < 0:
-                                    p1 = len(t1)
-                                t1 = t1[:p1]
-                                t2 = getattr(newDoc, 'affiliations')
-                                p2 = t2.find('; ')
-                                if p2 < 0:
-                                    p2 = len(t2)
-                                p3 = t2.find(')') + 2
-                                t2 = t2[p3:p2]
-                                setattr(newDoc, 'corrAuth', t1 + '; ' + t2)
+                        elif ab == 'affiliations' and ind in [7]:
+                            setattr(newDoc, ab, textL)
+                            t1 = getattr(newDoc, 'affiliations')
+                            p1 = t1.find('; ')
+                            if p1 < 0:
+                                p1 = len(t1)
+                            t1 = t1[:p1]
+                            setattr(newDoc, 'corrAuth',
+                                    getattr(newDoc, 'corrAuth') + "; " + t1)
                         # BSC, EBSCO, SportDiscus
                         elif ab == 'affiliations' and ind in [9, 13, 17]:
                             q1 = -1
@@ -596,6 +590,9 @@ def risFormat(risRecords, ind):
                             if 'Correspondence Address' in textL:
                                 o1 = textL.find('Correspondence Address') + 24
                                 setattr(newDoc, ab, textL[o1:])
+                            if 'email' in textL:
+                                o2 = textL.find('email:') + 7
+                                setattr(newDoc, 'eMail', textL[o2:])
                         else:
                             setattr(newDoc, ab, textL)
                     # If something is already written in this attribute
@@ -611,8 +608,10 @@ def risFormat(risRecords, ind):
                             if ind == 13:
                                 setattr(newDoc, ab, textL)
                             else:
-                                setattr(newDoc, 'eISSN',
-                                        line[6:10] + '-' + line[10:-1])
+                                anInt = filter(lambda x: x in numX, textL)
+                                if anInt != '':
+                                    setattr(newDoc, 'eISSN',
+                                            anInt[0:4] + '-' + anInt[4:8])
                 # Scopus: If no corresponding author was provided, use first
                 # author instead
                 if twoL == 'UR' and ind == 16:
@@ -848,10 +847,10 @@ if doReadIn == True:
         for line in f:
             fields = line.split('\t')
             if ic > 0:
-                contentInspec.append(Document(fields[6], fields[5], fields[-8],
+                contentInspec.append(Document(fields[6], fields[5], fields[51],
                                     fields[12], fields[50], None, fields[41],
-                                    fields[13], fields[-24],
-                                    inspecCorrAuth(fields[6], fields[-24]), 
+                                    fields[13], fields[35],
+                                    inspecCorrAuth(fields[6], fields[35]), 
                                     None, None, None, dbInspec.idNummer))
             else:
                 ic += 1
