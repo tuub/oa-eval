@@ -4,8 +4,8 @@
 ###############################################################################
 # This work is distributed under a BSD 3-Clause License.
 # license terms see https://opensource.org/licenses/BSD-3-Clause
-# developed mainly by Eva Bunge (ORCiD:0000-0002-5587-5934, github.com/ebunge) 
-# with support from Michaela Voigt (ORCiD:0000-0001-9486-3189, 
+# developed mainly by Eva Bunge (ORCiD:0000-0002-5587-5934, github.com/ebunge)
+# with support from Michaela Voigt (ORCiD:0000-0001-9486-3189,
 # github.com/michaelavoigt) and maintained by the Open Access team of
 # TU Berlin University Library
 ###############################################################################
@@ -20,10 +20,10 @@ import json
 
 # ----------------- 1. Enable/Disable Functionalities -------------------------
 
-# Detailed instructions for querying databases and preparing DOAJ data 
+# Detailed instructions for querying databases and preparing DOAJ data
 # are included in the manual (in German).
 
-# These variables are used to run only certain parts of the script. Set 
+# These variables are used to run only certain parts of the script. Set
 # them all to 'True' to run the whole script.
 # doAnalysis: If True - do some statistics and analysis of the final data. If
 # False - disable this feature.
@@ -38,7 +38,7 @@ doReadIn = True
 # 0: Disable this feature
 contactCR = 1
 
-# Variable that determines whether to contact Unpaywall in order to retrieve  
+# Variable that determines whether to contact Unpaywall in order to retrieve
 # data on green and hybrid OA. Possible values:
 # 1: Contact the Unpaywall-API to retrieve OA-article-data. Write results to file.
 # 2: Read results from previously created file instead
@@ -102,7 +102,7 @@ class Document(object):
     oaDOI2 = ''
     oaDOI3 = ''
     oaDOI4 = ''
-    
+
     def __init__(self, authors, title, DOI, journal, ISSN, eISSN, publisher,
                  year, affiliations, corrAuth, eMail, subject, funding, dbID):
         self.authors = authors
@@ -119,14 +119,14 @@ class Document(object):
         self.subject = subject
         self.funding = funding
         self.dbID = dbID
-        
+
     # Return first three consonants of the author's name concatenated with the
     # first 19 consonants of the title
     def konsonanten(self):
         d = ' '.join([''.join([i for i in self.authors if i in co]).lower()[0:3],
         ''.join([i for i in self.title if i in co]).lower()[0:19]])
         return d
-    
+
     # Return all values associated with a certain publication
     def arry(self):
         return [self.authors, self.title, self.oaStatus, self.DOI,
@@ -146,7 +146,7 @@ def kons(title):
 
 # Function that checks if an ISSN/eISSN is in the DOAJ and adds doaj-data
 # to the document
-# INPUT: List of documents to be checked, case = 1 in general, case = 2 if 
+# INPUT: List of documents to be checked, case = 1 in general, case = 2 if
 # finalList is being read in from a file
 def checkISSN(docList, case):
     for item in docList:
@@ -207,7 +207,7 @@ def inspecCorrAuth(auth, affil):
         tempor = affilList[-1]
     elif firstAuth < len(affilList):
         tempor = affilList[firstAuth].split('.')[:-2]
-    return authorList[0] + '; ' + ''.join(tempor) 
+    return authorList[0] + '; ' + ''.join(tempor)
 
 # Function that takes a list of documents and contacts CrossRef to find
 # missing ISSNs/eISSNs
@@ -236,7 +236,7 @@ def askCR(missISSN):
     print str(c) + ' ISSNs added via CrossRef'
     return reCheck
 
-# Contacts the Unpaywall-API to retrieve data on green / hybrid (& gold) OA 
+# Contacts the Unpaywall-API to retrieve data on green / hybrid (& gold) OA
 # status. Also retrieve publisher data if provided.
 # INPUT: List of publications that have a DOI but whose ISSN is not listed in
 #        the DOAJ
@@ -315,7 +315,7 @@ def wosFormat(wosRecords, ind):
     with open(wosRecords, 'rU') as f:
         for line in f:
             if i == 0:
-                newDoc = Document('', '', None, None, None, None, 
+                newDoc = Document('', '', None, None, None, None,
                                   None, None, '', None, None, None, None, ind)
                 i += 1
             le = len(line)
@@ -353,7 +353,7 @@ def wosFormat(wosRecords, ind):
 # variants and returns the names of institutions that have been identified.
 # INPUT: (text string with name of an institution, case 0 = corresponding
 #         author | case 1 = general affiliations)
-# OUTPUT: (bool stating if instition is part of approved list, names of 
+# OUTPUT: (bool stating if instition is part of approved list, names of
 #         institutions that have been found)
 def listCheck(institution, case):
     val = [None] * len(institutions)
@@ -374,7 +374,7 @@ def listCheck(institution, case):
             val[i] = True
     return (any(val), variant)
 
-# Function that takes data in PubMed-format and transforms it into a list of 
+# Function that takes data in PubMed-format and transforms it into a list of
 # Documents.
 # INPUT: (PubMed-records, database ID (integer))
 # OUTPUT: list of Documents
@@ -462,12 +462,12 @@ def risFormat(risRecords, ind):
                 if twoL in relMap:
                     ab = str(risFields[np.where(relMap == twoL)[0],0][0])
                     if getattr(newDoc, ab) in ('', None):
-                        
+
                         # Authors
                         if ab == 'authors' and ind in [4, 7, 9, 10, 11, 12, 17]:
                             setattr(newDoc, ab, textL)
                             setattr(newDoc, 'corrAuth', textL)
-                            
+
                         # DOIs
                         elif ab == 'DOI':
                             if '10.' in textL and 'y.com/' not in textL:
@@ -477,7 +477,7 @@ def risFormat(risRecords, ind):
                                 if ' ' in textL:
                                     textL = textL[:textL.find(' ')]
                                 setattr(newDoc, ab, textL.strip('doi:'))
-                        
+
                         # ISSNs
                         elif ab == 'ISSN':
                             if textL[0:4] != '978-':
@@ -488,11 +488,11 @@ def risFormat(risRecords, ind):
                                 if len(anInt) > 8:
                                     setattr(newDoc, 'eISSN',
                                             anInt[8:12] + '-' + anInt[12:16])
-                        
+
                         # Year
                         elif ab == 'year' and len(textL) > 4:
                             setattr(newDoc, ab, int(line[6:10]))
-                        
+
                         # affiliations
                         elif ab == 'affiliations' and ind in [4, 10, 11, 12]:
                             setattr(newDoc, ab, textL)
@@ -578,7 +578,7 @@ def risFormat(risRecords, ind):
                                 elif ind == 17:
                                     p2 = textL[p1:-1].find('. ')
                                 setattr(newDoc, 'eMail', textL[p1:p1 + p2].strip(';'))
-                        
+
                         # Corresponding Authors
                         elif ab == 'corrAuth' and ind == 14:
                             setattr(newDoc, ab, textL)
@@ -629,7 +629,7 @@ co = ('b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r',
           'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z')
 
 # Duplicate check
-# This function takes a set of data (= masterList) and compares incoming new 
+# This function takes a set of data (= masterList) and compares incoming new
 # data with it. All duplicates are removed from the new data which is then
 # added to the masterList. This action is repeated for each database.
 # Comparisons are done via DOI-matching and then title/author-matching.
@@ -679,7 +679,7 @@ def dubletten(iterates, masterList, dois, kons):
 
 # -------------------- 3. Set up Institutions ---------------------------------
 
-# Set up institutions. Format for name variants: 
+# Set up institutions. Format for name variants:
 # [[var1,var2],[var3]] is equivalent to: (var1 AND var2) OR (var3)
 # Careful: the name variant used when querying the database is not
 # necessarily the same name variant used in the raw data.
@@ -791,7 +791,7 @@ dbNameID = {datenbanken[i].idNummer: datenbanken[i].name for i in range(leDat)}
 
 # Read in database contents from text-files
 if doReadIn == True:
-# Read in the 'Web of Science' file and extract the relevant information. 
+# Read in the 'Web of Science' file and extract the relevant information.
     contentWoS = []
     with open('input-files/wos2016.txt') as f:
         ic = 0
@@ -807,7 +807,7 @@ if doReadIn == True:
                 ic += 1
     dbWoS.content = contentWoS
     print 'Finished reading in Web of Science'
-    
+
     # Read in the 'SciFinder' files and extract the relevant information.
     contentSF = []
     with open('input-files/sf2016.txt', 'rU') as f:
@@ -815,7 +815,7 @@ if doReadIn == True:
         for line in f:
             fields = line.split('\t')
             if ic > 0:
-                contentSF.append(Document(fields[6].strip('"'), 
+                contentSF.append(Document(fields[6].strip('"'),
                                 fields[3].strip('"'),
                                 fields[49].strip('\n').strip('\r').strip('"'),
                                 fields[17].strip('"'), fields[15].strip('"'),
@@ -830,7 +830,7 @@ if doReadIn == True:
         firstAuthor = item.authors.split('; ')[0]
         item.corrAuth = firstAuthor + '; ' + item.corrAuth
     print 'Finished reading in SciFinder'
-    
+
     # Read in 'PubMed' file and extract relevant information.
     dbPM.content = pubmedFormat('input-files/pubmed2016.txt', dbPM.idNummer)
     print 'Finished reading in PubMed'
@@ -839,7 +839,7 @@ if doReadIn == True:
     dbScopus.content = risFormat('input-files/scopus2016.ris',
                                  dbScopus.idNummer)
     print 'Finished reading in Scopus'
-    
+
     # Read in 'Inpsec' file and extract relevant information.
     contentInspec = []
     with open('input-files/inspec2016.txt') as f:
@@ -850,7 +850,7 @@ if doReadIn == True:
                 contentInspec.append(Document(fields[6], fields[5], fields[51],
                                     fields[12], fields[50], None, fields[41],
                                     fields[13], fields[35],
-                                    inspecCorrAuth(fields[6], fields[35]), 
+                                    inspecCorrAuth(fields[6], fields[35]),
                                     None, None, None, dbInspec.idNummer))
             else:
                 ic += 1
@@ -858,25 +858,25 @@ if doReadIn == True:
     print 'Finished reading in Inspec'
 
     # Read in 'TEMA' file and extract relevant information.
-    dbTEMA.content = risFormat('input-files/tema2016.ris', dbTEMA.idNummer)   
+    dbTEMA.content = risFormat('input-files/tema2016.ris', dbTEMA.idNummer)
     print 'Finished reading in TEMA'
-    
+
     # Read in 'ProQuest' file and extract relevant information.
     dbPQ.content = risFormat('input-files/pq2016.ris', dbPQ.idNummer)
     print 'Finished reading in ProQuest'
-    
+
     # Read in 'Business Source Complete' file and extract relevant information.
     dbBSC.content = risFormat('input-files/bsc2016.ris', dbBSC.idNummer)
     print 'Finished reading in Business Source Complete'
-    
-    # Read in 'GeoRef' file and extract relevant information.   
+
+    # Read in 'GeoRef' file and extract relevant information.
     dbGf.content = risFormat('input-files/gf2016.ris', dbGf.idNummer)
     print 'Finished reading in GeoRef'
-    
+
     # Read in 'CINAHL' file and extract relevant information.
     dbCIN.content = risFormat('input-files/cinahl2016.ris', dbCIN.idNummer)
     print 'Finished reading in CINAHL'
-    
+
     # Read in 'LISA' file and extract relevant information.
     dbLisa.content = risFormat('input-files/lisa2016.ris', dbLisa.idNummer)
     print 'Finished reading in LISA'
@@ -888,7 +888,7 @@ if doReadIn == True:
     # Read in 'Embase' file and extract relevant information.
     dbEm.content = risFormat('input-files/embase2016.ris', dbEm.idNummer)
     print 'Finished reading in Embase'
-    
+
     # Read in 'SportDiscus' file and extract relevant information.
     dbSD.content = risFormat('input-files/sd2016.ris', dbSD.idNummer)
     print 'Finished reading in Sport Discus'
@@ -896,14 +896,14 @@ if doReadIn == True:
     # Read in 'IEEE' file and extract relevant information.
     dbIEEE.content = risFormat('input-files/IEEE2016.ris', dbIEEE.idNummer)
     print 'Finished reading in IEEE'
-    
+
     # Read in 'EBSCO' file and extract relevant information.
     dbEB.content = risFormat('input-files/ebsco2016-v2.ris', dbEB.idNummer)
     print 'Finished reading in EBSCO'
-    
-# do not set up a new database below this line!    
-    
-    # Transform all characters in DOIs to lower case    
+
+# do not set up a new database below this line!
+
+    # Transform all characters in DOIs to lower case
     for item in datenbanken:
         for article in item.content:
             if article.DOI != None:
@@ -998,7 +998,7 @@ for item in finalList:
 
 # ------------- 7. Identify OA-articles and add DOAJ Data ---------------------
 
-# Reads in the file with the data from DOAJ and crossreferences it with the 
+# Reads in the file with the data from DOAJ and crossreferences it with the
 # ISSNs and eISSNs from the database data.
 # Add information about the subject, publisher and journal licence
 doaj = np.loadtxt('input-files/doaj.txt', dtype = 'string', comments = '$#',
@@ -1022,7 +1022,7 @@ print 'Finished identifying OA articles'
 # missing ISSNs and crossreference them with the DOAJ
 if contactCR == 1:
     nonOA = [item for item in finalList
-             if item.oaStatus == None 
+             if item.oaStatus == None
              and item.DOI != None
              and item.DOI != ''
              and item.ISSN == None and item.eISSN == None]
@@ -1075,10 +1075,10 @@ databaseID\tnotes\toaDOI[is_oa]\toaDOI[journal_is_oa]\toaDOI[host_type]\t\
 oaDOI[license]\tAPC Amount\tAPC Currency'
 if checkToDo == 1:
     np.savetxt('output-files/docsToBeChecked.txt',
-               [item.arry() for item in toCheck], 
+               [item.arry() for item in toCheck],
                delimiter='\t', header = ch, comments = '', fmt='"%s"')
 
-# Read in articles that were checked by hand and were found to have a 
+# Read in articles that were checked by hand and were found to have a
 # first/corresponding author from a relevant institution.
 # Format: One line for each puclication. Three columns in this order:
 # Title, DOI, found name variant. Tab-separated.
@@ -1100,7 +1100,7 @@ elif checkToDo == 2:
             idDoc.nameVariant = item[2]
             idDoc.checks += 'Checked by hand. '
         elif kons(item[0]) in titles1:
-            idDoc = next((x for x in toCheck 
+            idDoc = next((x for x in toCheck
                           if x.konsonanten()[4:] == kons(item[0])), None)
             idDoc.nameVariant = item[2]
             idDoc.checks += 'Checked by hand. '
@@ -1109,7 +1109,7 @@ elif checkToDo == 2:
             dontknow.append(item)
     if dontknow != []:
         np.savetxt('output-files/docsCheckedCantFind.txt',
-                   [item for item in dontknow], 
+                   [item for item in dontknow],
                    delimiter='\t', header = 'Title\tDOI\tAffiliation',
                    comments = '', fmt='"%s"')
 
@@ -1140,7 +1140,7 @@ allCurrencies = set([item.APCCurrency for item in withAPC])
 APCAmounts = [[0 for x in range(2)] for y in range(len(allCurrencies))]
 h = 0
 for curr in allCurrencies:
-    APCAmounts[h][0] = sum([int(item.APCValue) for item in withAPC 
+    APCAmounts[h][0] = sum([int(item.APCValue) for item in withAPC
                             if item.APCCurrency == curr])
     APCAmounts[h][1] = curr
     h += 1
@@ -1148,7 +1148,7 @@ print 'The DOAJ provides APC-amounts for ', len(withAPC), ' of ', \
 corrAuthNumber, ' gold OA-publications where the corresponding author is from \
 a relevant institution. These add up to the following amounts:\n'
 for h in range(len(allCurrencies)):
-    print APCAmounts[h][0], '\t', APCAmounts[h][1], '\n' 
+    print APCAmounts[h][0], '\t', APCAmounts[h][1], '\n'
 
 # Save results to file
 np.savetxt('output-files/allPubs.txt', [item.arry() for item in finalList],
@@ -1162,13 +1162,13 @@ np.savetxt('output-files/allPubs.txt', [item.arry() for item in finalList],
 if doAnalysis == True:
     # Count OA/Hybrid/CorrAuth for every year in dataset
     yearsAll = [int(x.year) for x in finalList if x.year != None]
-    yearsOA = [int(x.year) for x in finalList if x.year != None 
+    yearsOA = [int(x.year) for x in finalList if x.year != None
                and x.oaStatus == 'gold']
-    yearsOACorr = [int(x.year) for x in finalList if x.year != None 
+    yearsOACorr = [int(x.year) for x in finalList if x.year != None
                    and x.nameVariant != None and x.oaStatus == 'gold']
-    yearsHybrid = [int(x.year) for x in finalList if x.year != None 
+    yearsHybrid = [int(x.year) for x in finalList if x.year != None
                    and x.oaStatus == 'hybrid']
-    yearsGreen = [int(x.year) for x in finalList if x.year != None 
+    yearsGreen = [int(x.year) for x in finalList if x.year != None
                    and x.oaStatus == 'green']
     years = sorted(list(set(yearsAll)))
     lenyr = len(years)
@@ -1181,9 +1181,9 @@ if doAnalysis == True:
     percOACorr = [None] * lenyr
     percHybrid = [None] * lenyr
     percGreen = [None] * lenyr
-    ta = PrettyTable(['year', '# Publications', '# Gold', 
+    ta = PrettyTable(['year', '# Publications', '# Gold',
                      '# Hybrid', '# Green', '# OA P. + Corr. Author'])
-    
+
     # Create table content
     for i in range(0, lenyr):
         pubAll[i] = yearsAll.count(years[i])
@@ -1228,7 +1228,7 @@ if doAnalysis == True:
     percOA.append(round(float(100 * sum(pubOA))/float(sum(pubAll)),1))
     percHybrid.append(round(float(100 * sum(pubHybrid))/float(sum(pubAll)),1))
     percGreen.append(round(float(100 * sum(pubGreen))/float(sum(pubAll)),1))
-    
+
     # Save results to file
     ch = 'year\tNo. Publications\tNo. OA Publications\t% OA Publications\t\
     No. Hybrid Publications\t% Hybrid Publications\tNo. Green Publications\t\
@@ -1239,7 +1239,7 @@ if doAnalysis == True:
                                   percOACorr]))
     np.savetxt('output-files/statistics_OA.txt', OAStats,
                delimiter='\t', header = ch, comments = '', fmt='"%s"')
-    
+
     # Add last line to table in console
     v1 = str(pubOA[-1]) + ' ~ ' + str(percOA[-1]) + ' %'
     v3 = str(pubHybrid[-1]) + ' ~ ' + str(percHybrid[-1]) + ' %'
@@ -1267,8 +1267,8 @@ if doAnalysis == True:
     haeuf = publishers.most_common(pN)
     publisherStats = [None] * pN
     tally = 0.
-    noPubl = ['x', 'UNKNOWN', 0, 0, 0] 
-    tb = PrettyTable(['Rank', 'Publisher', '# Publications', 
+    noPubl = ['x', 'UNKNOWN', 0, 0, 0]
+    tb = PrettyTable(['Rank', 'Publisher', '# Publications',
                       '% of Publications', 'Cumulative % of Publications'])
     counts = 0
     for i in range(0, pN):
@@ -1285,7 +1285,7 @@ if doAnalysis == True:
             if counts < 21:
                 tb.add_row(publisherStats[i])
     tally += noPubl[2]
-    noPubl[3] = round(100. * noPubl[2]/pAN, 2)         
+    noPubl[3] = round(100. * noPubl[2]/pAN, 2)
     noPubl[4] = round(100. * tally/pAN, 2)
     publisherStats.append(noPubl)
     publisherStats = [item for item in publisherStats if item != None]
