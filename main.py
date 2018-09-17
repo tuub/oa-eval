@@ -224,7 +224,7 @@ def askCR(missISSN):
             response = urllib2.urlopen(myurl)
             cr_data = json.load(response)
             cr_data_msg = cr_data["message"]
-            if cr_data_msg.has_key("ISSN"):
+            if "ISSN" in cr_data_msg:
                 c += 1
                 reCheck.append(doc)
                 doc.ISSN = str(cr_data_msg["ISSN"][0])
@@ -259,9 +259,9 @@ def askOaDOI(needInfo):
             response = urllib2.urlopen(myurl)
             response = json.load(response)
             for item in relKeys:
-                if response.has_key(relKeys[item]):
+                if relKeys[item] in response:
                     replies[i][item] = response[relKeys[item]]
-                elif response.has_key('best_oa_location'):
+                elif 'best_oa_location' in response:
                     subresponse = response['best_oa_location']
                     if subresponse != None:
                         replies[i][item] = subresponse[relKeys[item]]
