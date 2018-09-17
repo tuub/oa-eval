@@ -342,7 +342,7 @@ def wosFormat(wosRecords, ind):
             elif kuerzel == 'AF' and line[0:2] == '  ':
                 newDoc.authors += '; '
                 newDoc.authors += line[3:le].strip('\n').strip('\r')
-            elif line[0:2]  == 'FN':
+            elif line[0:2] == 'FN':
                 records.append(newDoc)
                 newDoc = Document('', '', None, None, None, None,
                                   None, None, '', None, None, None, None, ind)
@@ -388,7 +388,7 @@ def pubmedFormat(pmRecords, ind):
             lengths = len(line)
             if line[0:2] != '  ':
                 kuerzel = line[0:4]
-            if line[0:4]  == 'PMID':
+            if line[0:4] == 'PMID':
                 authorCount = 0
                 if i > 0:
                     records.append(newDoc)
@@ -398,7 +398,7 @@ def pubmedFormat(pmRecords, ind):
             elif line[0:2] == 'TI':
                 newDoc.title = line[6:lengths].strip('\n').strip('\r')
             elif kuerzel == 'TI  ' and line[0:2] == '  ':
-                newDoc.title += ' ';
+                newDoc.title += ' '
                 newDoc.title += line[6:lengths].strip('\n').strip('\r')
             elif line[0:2] == 'IS' and line[-5:-2] == 'nic':
                 newDoc.eISSN = line[6:15]
@@ -732,7 +732,7 @@ ASHnames = [['Alice','Salomon','Berlin'], ['ASH','Berlin'],
             ['Universidad Alice Salomon']]
 ASH = Inst('ASH', ASHnames)
 
-#Create list of institutions
+# Create list of institutions
 institutions = [x for x in Inst.instances]
 
 # If the name of the institution is very generic, a second set of name
@@ -756,7 +756,6 @@ TU.nameVar1 = [['Technische Universitat Berlin'],
                 ['Technische Universitaet de Berlin'],
                 ['Technical University of Berlin'],
                 ['Berlin University of Technology']]
-
 
 
 # ------------- 4. Read in Text Files and Extract Information -----------------
@@ -791,7 +790,7 @@ dbNameID = {datenbanken[i].idNummer: datenbanken[i].name for i in range(leDat)}
 
 # Read in database contents from text-files
 if doReadIn == True:
-# Read in the 'Web of Science' file and extract the relevant information.
+    # Read in the 'Web of Science' file and extract the relevant information.
     contentWoS = []
     with open('input-files/wos2016.txt') as f:
         ic = 0
