@@ -641,10 +641,7 @@ co = ('b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r',
 #         list of DOIs (strings), list of strings for title/author-matching)
 # OUTPUT: list containing Documents with duplicates removed
 def dubletten(iterates, masterList, dois, kons):
-    if iterates == 1:
-        nowList = dbSF.content
-    else:
-        nowList = datenbanken[iterates].content
+    nowList = datenbanken[iterates].content
     if iterates == 1:
         doiList = [x.DOI for x in masterList]
         konsMast = [item.konsonanten() for item in masterList]
