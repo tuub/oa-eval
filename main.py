@@ -183,12 +183,12 @@ def checkISSN(docList, case):
                         j = np.where(doaj == item.ISSN)
                     elif test2:
                         j = np.where(doaj == item.eISSN)
-                    item.doajSubject = str(doaj[j[0],3]).strip("['").strip("']")
-                    item.publisher = str(doaj[j[0],6]).strip("['").strip("']")
+                    item.doajSubject = str(doaj[j[0], 3]).strip("['").strip("']")
+                    item.publisher = str(doaj[j[0], 6]).strip("['").strip("']")
                     if '\n' in item.publisher:
                         item.publisher = ''.join([s for s in item.publisher
                                                   if s != '\n'])
-                    item.lizenz = str(doaj[j[0],7]).strip("['").strip("']")
+                    item.lizenz = str(doaj[j[0], 7]).strip("['").strip("']")
     return
 
 # Function to identify corresponding authors (= first authors) in Inspec data
@@ -246,8 +246,8 @@ def askCR(missISSN):
 def askOaDOI(needInfo):
     print 'Begin contacting Unpaywall'
     baseurl = 'https://api.unpaywall.org/v2/'
-    relKeys = {1:'is_oa', 2:'journal_is_oa', 3:'host_type', 4:'license',
-               5:'publisher'}
+    relKeys = {1: 'is_oa', 2: 'journal_is_oa', 3: 'host_type', 4: 'license',
+               5: 'publisher'}
     replies = [[0 for x in range(7)] for y in range(len(needInfo))]
     i = 0
     errDOIs = []
@@ -444,7 +444,7 @@ numX = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X']
 def risFormat(risRecords, ind):
     records = []
     newDoc = None
-    relMap = risFields[:,np.where(risFields[0,:] == str(ind))]
+    relMap = risFields[:, np.where(risFields[0, :] == str(ind))]
     with open(risRecords, 'rU') as f:
         for line in f:
             twoL = line[0:2]
@@ -460,7 +460,7 @@ def risFormat(risRecords, ind):
                                   '', None, None, None, None, ind)
             if twoL.isupper() and line[2] == ' ':
                 if twoL in relMap:
-                    ab = str(risFields[np.where(relMap == twoL)[0],0][0])
+                    ab = str(risFields[np.where(relMap == twoL)[0], 0][0])
                     if getattr(newDoc, ab) in ('', None):
 
                         # Authors
@@ -694,8 +694,8 @@ Cnames = [['Charit', 'Univ'],
 Charite = Inst('Charité', Cnames)
 
 # FU
-FUnames = [['Berlin','FU'], ['Berlin','Free Univ'],
-           ['Berlin','Freie','Univ'], ['Univ', 'Libre', 'Berlin']]
+FUnames = [['Berlin', 'FU'], ['Berlin', 'Free Univ'],
+           ['Berlin', 'Freie', 'Univ'], ['Univ', 'Libre', 'Berlin']]
 FU = Inst('FU', FUnames)
 
 # HU
@@ -719,13 +719,13 @@ HTWnames = [['HTW', 'Berlin'],
 HTW = Inst('HTW', HTWnames)
 
 # HWR
-HWRnames = [['HWR','Berlin'],
-            ['Wirt','Recht','Berlin'],
+HWRnames = [['HWR', 'Berlin'],
+            ['Wirt', 'Recht', 'Berlin'],
             ['Berlin', 'Economics', 'Law', 'School']]
 HWR = Inst('HWR', HWRnames)
 
 # Alice Salomon
-ASHnames = [['Alice','Salomon','Berlin'], ['ASH','Berlin'],
+ASHnames = [['Alice', 'Salomon', 'Berlin'], ['ASH', 'Berlin'],
             ['Universidad Alice Salomon']]
 ASH = Inst('ASH', ASHnames)
 
@@ -1001,8 +1001,8 @@ doaj = np.loadtxt('input-files/doaj.txt', dtype = 'string', comments = '$#',
                   skiprows = 1, delimiter = '\t',
                   usecols = (3, 4, 0, 56, 11, 12, 5, 44, 29))
 print 'Finished reading in DOAJ data'
-issns = collections.Counter(doaj[:,0])
-eissns = collections.Counter(doaj[:,1])
+issns = collections.Counter(doaj[:, 0])
+eissns = collections.Counter(doaj[:, 1])
 for item in finalList:
     if item.ISSN == '':
         item.ISSN = None
@@ -1187,14 +1187,14 @@ if doAnalysis == True:
         pubOACorr[i] = yearsOACorr.count(years[i])
         pubHybrid[i] = yearsHybrid.count(years[i])
         pubGreen[i] = yearsGreen.count(years[i])
-        percOA[i] = round(float(100 * pubOA[i])/float(pubAll[i]),1)
+        percOA[i] = round(float(100 * pubOA[i])/float(pubAll[i]), 1)
         if pubOA[i] > 0:
-            percOACorr[i] = round(float(100 * pubOACorr[i])/float(pubOA[i]),1)
+            percOACorr[i] = round(float(100 * pubOACorr[i])/float(pubOA[i]), 1)
         else:
             percOACorr[i] = 0
         if pubAll[i] > 0:
-            percHybrid[i] = round(float(100 * pubHybrid[i])/float(pubAll[i]),1)
-            percGreen[i] = round(float(100 * pubGreen[i])/float(pubAll[i]),1)
+            percHybrid[i] = round(float(100 * pubHybrid[i])/float(pubAll[i]), 1)
+            percGreen[i] = round(float(100 * pubGreen[i])/float(pubAll[i]), 1)
         else:
             percHybrid[i] = 0
             percGreen[i] = 0
@@ -1220,17 +1220,17 @@ if doAnalysis == True:
     pubHybrid.append(sum(pubHybrid))
     pubGreen.append(sum(pubGreen))
     pubOACorr.append(sum(pubOACorr))
-    percOACorr.append(round(float(100 * sum(pubOACorr))/float(sum(pubOA)),1))
-    percOA.append(round(float(100 * sum(pubOA))/float(sum(pubAll)),1))
-    percHybrid.append(round(float(100 * sum(pubHybrid))/float(sum(pubAll)),1))
-    percGreen.append(round(float(100 * sum(pubGreen))/float(sum(pubAll)),1))
+    percOACorr.append(round(float(100 * sum(pubOACorr))/float(sum(pubOA)), 1))
+    percOA.append(round(float(100 * sum(pubOA))/float(sum(pubAll)), 1))
+    percHybrid.append(round(float(100 * sum(pubHybrid))/float(sum(pubAll)), 1))
+    percGreen.append(round(float(100 * sum(pubGreen))/float(sum(pubAll)), 1))
 
     # Save results to file
     ch = 'year\tNo. Publications\tNo. OA Publications\t% OA Publications\t\
     No. Hybrid Publications\t% Hybrid Publications\tNo. Green Publications\t\
     % Green Publications\tNo. OA Publications + Corr. Author\t\
     % OA Publications with Corr. Auth'
-    OAStats = map(list,map(None,*[years, pubAll, pubOA, percOA, pubHybrid,
+    OAStats = map(list, map(None, *[years, pubAll, pubOA, percOA, pubHybrid,
                                   percHybrid, pubGreen, percGreen, pubOACorr,
                                   percOACorr]))
     np.savetxt('output-files/statistics_OA.txt', OAStats,
