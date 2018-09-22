@@ -527,7 +527,7 @@ def risFormat(risRecords, ind):
                                 if ind == 9:
                                     q2 = textL.find('Issue Info:') - 2
                                     q3 = textL[q1:q2+2].find('; ')
-                                    qd = q1 + 3
+                                    qd = q1 + q3
                                     setattr(newDoc, 'corrAuth',
                                             beTe + "; " + textL[q1:qd])
                                 # EBSCO
