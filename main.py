@@ -1249,7 +1249,7 @@ if doAnalysis == True:
     print u'Percentages for Gold OA and hybrid and green publications refer \
 to the overall number of articles. The percentage for OA publications \
 with a corresponding author from a relevant institution refer to the \
-number of gold OA publications. ' , str(len(finalList) - pubAll[-1]), \
+number of gold OA publications. ', str(len(finalList) - pubAll[-1]), \
 'publications were not included in this table, because the data provided \
 by the database does not contain a year.'
 
