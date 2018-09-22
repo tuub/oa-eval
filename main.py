@@ -265,14 +265,14 @@ def askOaDOI(needInfo):
                     subresponse = response['best_oa_location']
                     if subresponse is not None:
                         replies[i][item] = subresponse[relKeys[item]]
-            if replies[i][1] == True and replies[i][2] == True:
+            if replies[i][1] and replies[i][2]:
                 doc.oaStatus = 'gold'
                 doc.checks += 'Identified via Unpaywall '
-            elif replies[i][1] == True and replies[i][2] == False \
+            elif replies[i][1] and not replies[i][2] \
                                        and replies[i][3] == 'repository':
                 doc.oaStatus = 'green'
                 doc.checks += 'Identified via Unpaywall '
-            elif replies[i][1] == True and replies[i][2] == False \
+            elif replies[i][1] and not replies[i][2] \
                                        and replies[i][3] == 'publisher':
                 if 'cc' in str(replies[i][4]):
                     doc.oaStatus = 'hybrid'
@@ -786,7 +786,7 @@ leDat = len(datenbanken)
 dbNameID = {datenbanken[i].idNummer: datenbanken[i].name for i in range(leDat)}
 
 # Read in database contents from text-files
-if doReadIn == True:
+if doReadIn:
     # Read in the 'Web of Science' file and extract the relevant information.
     contentWoS = []
     with open('input-files/wos2016.txt') as f:
@@ -910,13 +910,13 @@ if doReadIn == True:
 
 # Calls the function 'dubletten' above and prints statistics or reads in data
 # from previous run of the script
-if doReadIn == True:
+if doReadIn:
     print 'Remove Duplicates:'
     print 'Number of records in "Web of Science": ', len(contentWoS)
     finalList = dubletten(1, contentWoS, None, None)
     with open('finalList', "wb") as f:
         pickle.dump(finalList, f)
-elif doReadIn == False:
+elif not doReadIn:
     with open('finalList', "rb") as f:
         finalList = pickle.load(f)
 
@@ -984,11 +984,11 @@ for item in finalList:
 for item in finalList:
     if item.corrAuth not in [None, '']:
         i, j = listCheck(item.corrAuth, 0)
-        if i == True:
+        if i:
             item.nameVariant = j
     if item.affiliations not in [None, '']:
         k, l = listCheck(item.affiliations, 1)
-        if k == True:
+        if k:
             item.allNameVariants = l
 
 
@@ -1155,7 +1155,7 @@ np.savetxt('output-files/allPubs.txt', [item.arry() for item in finalList],
 
 # Figure out how many of each kind of publication for each year, display this
 # in a table and save data to file
-if doAnalysis == True:
+if doAnalysis:
     # Count OA/Hybrid/CorrAuth for every year in dataset
     yearsAll = [int(x.year) for x in finalList if x.year is not None]
     yearsOA = [int(x.year) for x in finalList if x.year is not None
@@ -1254,7 +1254,7 @@ number of gold OA publications. ', str(len(finalList) - pubAll[-1]), \
 by the database does not contain a year.'
 
 # Do statistics for publishers of OA articles and save results to file
-if doAnalysis == True:
+if doAnalysis:
     publishersAll = [x.publisher for x in finalList if x.oaStatus == 'gold']
     pAN = float(len(publishersAll))
     publishers = collections.Counter(publishersAll)
