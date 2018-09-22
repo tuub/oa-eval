@@ -294,9 +294,9 @@ def askOaDOI(needInfo):
             print 'Now received responses for ', i, ' documents from Unpaywall'
     ch = 'DOI\tis_oa\tjournal_is_oa\thost_type\tlicense\tpublisher\toaStatus'
     np.savetxt('output-files/oaDOI-response.txt', replies, delimiter='\t',
-               header = ch, comments = '', fmt='"%s"')
+               header=ch, comments='', fmt='"%s"')
     np.savetxt('output-files/DOIs-oaDOI-error.txt', errDOIs, delimiter='\t',
-               header = 'DOIs causing error at Unpaywall-API', comments = '',
+               header='DOIs causing error at Unpaywall-API', comments='',
                fmt='"%s"')
     print 'Saved Unpaywall-responses to file "oaDOI-responses.txt"'
     return
@@ -433,7 +433,7 @@ def pubmedFormat(pmRecords, ind):
     return records
 
 # Read in table mapping RIS-fields of databases to document-attributes
-risFields = np.genfromtxt('RIS-fields.csv', delimiter=';', dtype = None)
+risFields = np.genfromtxt('RIS-fields.csv', delimiter=';', dtype=None)
 
 # Valid characters for ISSNs
 numX = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X']
@@ -997,9 +997,9 @@ for item in finalList:
 # Reads in the file with the data from DOAJ and crossreferences it with the
 # ISSNs and eISSNs from the database data.
 # Add information about the subject, publisher and journal licence
-doaj = np.loadtxt('input-files/doaj.txt', dtype = 'string', comments = '$#',
-                  skiprows = 1, delimiter = '\t',
-                  usecols = (3, 4, 0, 56, 11, 12, 5, 44, 29))
+doaj = np.loadtxt('input-files/doaj.txt', dtype='string', comments='$#',
+                  skiprows=1, delimiter='\t',
+                  usecols=(3, 4, 0, 56, 11, 12, 5, 44, 29))
 print 'Finished reading in DOAJ data'
 issns = collections.Counter(doaj[:, 0])
 eissns = collections.Counter(doaj[:, 1])
@@ -1072,7 +1072,7 @@ oaDOI[license]\tAPC Amount\tAPC Currency'
 if checkToDo == 1:
     np.savetxt('output-files/docsToBeChecked.txt',
                [item.arry() for item in toCheck],
-               delimiter='\t', header = ch, comments = '', fmt='"%s"')
+               delimiter='\t', header=ch, comments='', fmt='"%s"')
 
 # Read in articles that were checked by hand and were found to have a
 # first/corresponding author from a relevant institution.
@@ -1106,8 +1106,8 @@ elif checkToDo == 2:
     if dontknow != []:
         np.savetxt('output-files/docsCheckedCantFind.txt',
                    [item for item in dontknow],
-                   delimiter='\t', header = 'Title\tDOI\tAffiliation',
-                   comments = '', fmt='"%s"')
+                   delimiter='\t', header='Title\tDOI\tAffiliation',
+                   comments='', fmt='"%s"')
 
 
 # ---------------- 11. Print final results and estimate APCs ------------------
@@ -1148,7 +1148,7 @@ for h in range(len(allCurrencies)):
 
 # Save results to file
 np.savetxt('output-files/allPubs.txt', [item.arry() for item in finalList],
-           delimiter='\t', header = ch, comments = '', fmt='"%s"')
+           delimiter='\t', header=ch, comments='', fmt='"%s"')
 
 
 # ------------------------- 12. Basic Statistics ------------------------------
@@ -1234,7 +1234,7 @@ if doAnalysis == True:
                                   percHybrid, pubGreen, percGreen, pubOACorr,
                                   percOACorr]))
     np.savetxt('output-files/statistics_OA.txt', OAStats,
-               delimiter='\t', header = ch, comments = '', fmt='"%s"')
+               delimiter='\t', header=ch, comments='', fmt='"%s"')
 
     # Add last line to table in console
     v1 = str(pubOA[-1]) + ' ~ ' + str(percOA[-1]) + ' %'
@@ -1288,5 +1288,5 @@ if doAnalysis == True:
     ch = 'Rank\tPublisher\t# Publications\t% Publications\t\
     Cumulative % of Publications'
     np.savetxt('output-files/statistics_goldPublishers.txt', publisherStats,
-                   delimiter='\t', header = ch, comments = '', fmt='"%s"')
+                   delimiter='\t', header=ch, comments='', fmt='"%s"')
     print tb
