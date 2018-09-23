@@ -164,8 +164,8 @@ def checkISSN(docList, case):
                     t1 = [rec for rec in doaj if rec[1] == item.eISSN]
                 test3 = int(t1[0][8]) <= int(item.year)
             if test3:
-                if (item.ISSN != None and test1) \
-                or (item.eISSN != None and test2):
+                if (item.ISSN is not None and test1) \
+                or (item.eISSN is not None and test2):
                     if case == 1:
                         item.oaStatus = 'gold'
                         item.checks += 'Identified via DOAJ '
@@ -183,12 +183,12 @@ def checkISSN(docList, case):
                         j = np.where(doaj == item.ISSN)
                     elif test2:
                         j = np.where(doaj == item.eISSN)
-                    item.doajSubject = str(doaj[j[0],3]).strip("['").strip("']")
-                    item.publisher = str(doaj[j[0],6]).strip("['").strip("']")
+                    item.doajSubject = str(doaj[j[0], 3]).strip("['").strip("']")
+                    item.publisher = str(doaj[j[0], 6]).strip("['").strip("']")
                     if '\n' in item.publisher:
                         item.publisher = ''.join([s for s in item.publisher
                                                   if s != '\n'])
-                    item.lizenz = str(doaj[j[0],7]).strip("['").strip("']")
+                    item.lizenz = str(doaj[j[0], 7]).strip("['").strip("']")
     return
 
 # Function to identify corresponding authors (= first authors) in Inspec data
@@ -246,8 +246,8 @@ def askCR(missISSN):
 def askOaDOI(needInfo):
     print 'Begin contacting Unpaywall'
     baseurl = 'https://api.unpaywall.org/v2/'
-    relKeys = {1:'is_oa', 2:'journal_is_oa', 3:'host_type', 4:'license',
-               5:'publisher'}
+    relKeys = {1: 'is_oa', 2: 'journal_is_oa', 3: 'host_type', 4: 'license',
+               5: 'publisher'}
     replies = [[0 for x in range(7)] for y in range(len(needInfo))]
     i = 0
     errDOIs = []
@@ -263,16 +263,16 @@ def askOaDOI(needInfo):
                     replies[i][item] = response[relKeys[item]]
                 elif 'best_oa_location' in response:
                     subresponse = response['best_oa_location']
-                    if subresponse != None:
+                    if subresponse is not None:
                         replies[i][item] = subresponse[relKeys[item]]
-            if replies[i][1] == True and replies[i][2] == True:
+            if replies[i][1] and replies[i][2]:
                 doc.oaStatus = 'gold'
                 doc.checks += 'Identified via Unpaywall '
-            elif replies[i][1] == True and replies[i][2] == False \
+            elif replies[i][1] and not replies[i][2] \
                                        and replies[i][3] == 'repository':
                 doc.oaStatus = 'green'
                 doc.checks += 'Identified via Unpaywall '
-            elif replies[i][1] == True and replies[i][2] == False \
+            elif replies[i][1] and not replies[i][2] \
                                        and replies[i][3] == 'publisher':
                 if 'cc' in str(replies[i][4]):
                     doc.oaStatus = 'hybrid'
@@ -294,9 +294,9 @@ def askOaDOI(needInfo):
             print 'Now received responses for ', i, ' documents from Unpaywall'
     ch = 'DOI\tis_oa\tjournal_is_oa\thost_type\tlicense\tpublisher\toaStatus'
     np.savetxt('output-files/oaDOI-response.txt', replies, delimiter='\t',
-               header = ch, comments = '', fmt='"%s"')
+               header=ch, comments='', fmt='"%s"')
     np.savetxt('output-files/DOIs-oaDOI-error.txt', errDOIs, delimiter='\t',
-               header = 'DOIs causing error at Unpaywall-API', comments = '',
+               header='DOIs causing error at Unpaywall-API', comments='',
                fmt='"%s"')
     print 'Saved Unpaywall-responses to file "oaDOI-responses.txt"'
     return
@@ -367,7 +367,7 @@ def listCheck(institution, case):
         for j in range(0, len(instList)):
             valu[j] = all(word in institution for word in instList[j])
         if any(valu):
-            if variant == None:
+            if variant is None:
                 variant = institutions[i].name
             else:
                 variant += '; ' + institutions[i].name
@@ -433,7 +433,7 @@ def pubmedFormat(pmRecords, ind):
     return records
 
 # Read in table mapping RIS-fields of databases to document-attributes
-risFields = np.genfromtxt('RIS-fields.csv', delimiter=';', dtype = None)
+risFields = np.genfromtxt('RIS-fields.csv', delimiter=';', dtype=None)
 
 # Valid characters for ISSNs
 numX = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X']
@@ -444,7 +444,7 @@ numX = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X']
 def risFormat(risRecords, ind):
     records = []
     newDoc = None
-    relMap = risFields[:,np.where(risFields[0,:] == str(ind))]
+    relMap = risFields[:, np.where(risFields[0, :] == str(ind))]
     with open(risRecords, 'rU') as f:
         for line in f:
             twoL = line[0:2]
@@ -454,13 +454,13 @@ def risFormat(risRecords, ind):
             else:
                 newDocInd = 'TY'
             if twoL == newDocInd:
-                if newDoc != None:
+                if newDoc is not None:
                     records.append(newDoc)
                 newDoc = Document('', '', None, None, None, None, None, None,
                                   '', None, None, None, None, ind)
             if twoL.isupper() and line[2] == ' ':
                 if twoL in relMap:
-                    ab = str(risFields[np.where(relMap == twoL)[0],0][0])
+                    ab = str(risFields[np.where(relMap == twoL)[0], 0][0])
                     if getattr(newDoc, ab) in ('', None):
 
                         # Authors
@@ -521,7 +521,7 @@ def risFormat(risRecords, ind):
                                     while textL[q1-1] != ' ':
                                         q1 -= 1
                                 beTe = getattr(newDoc, 'corrAuth')
-                                if beTe == None:
+                                if beTe is None:
                                     beTe = ''
                                 # BSC
                                 if ind == 9:
@@ -546,7 +546,7 @@ def risFormat(risRecords, ind):
                                         qd = q1 + q3
                                     else:
                                         qd = q2
-                                    if getattr(newDoc, 'corrAuth') == None:
+                                    if getattr(newDoc, 'corrAuth') is None:
                                         setattr(newDoc, 'corrAuth', '')
                                     setattr(newDoc, 'corrAuth',
                                             beTe + "; " + textL[q1:qd])
@@ -615,7 +615,7 @@ def risFormat(risRecords, ind):
                 # Scopus: If no corresponding author was provided, use first
                 # author instead
                 if twoL == 'UR' and ind == 16:
-                    if newDoc.corrAuth == None:
+                    if newDoc.corrAuth is None:
                         authorList = newDoc.authors.split('; ')
                         affilList = newDoc.affiliations.split('; ')
                         setattr(newDoc, 'corrAuth',
@@ -651,13 +651,13 @@ def dubletten(iterates, masterList, dois, kons):
     f = collections.Counter(konsMast)
     i = len(nowList)
     print datenbanken[iterates].name, ' - number of records: ', i
-    nowList = [item for item in nowList if item.DOI == None
+    nowList = [item for item in nowList if item.DOI is None
                                         or item.DOI.strip('"') == ''
                                         or item.DOI.strip('"') not in doiList]
     j = len(nowList)
     print datenbanken[iterates].name, \
           ' - number of records removed via DOI-matching: ', i-j
-    nowList = [item for item in nowList if item.authors != None
+    nowList = [item for item in nowList if item.authors is not None
                                         and item.konsonanten() not in f]
     k = len(nowList)
     print datenbanken[iterates].name, \
@@ -694,8 +694,8 @@ Cnames = [['Charit', 'Univ'],
 Charite = Inst('Charité', Cnames)
 
 # FU
-FUnames = [['Berlin','FU'], ['Berlin','Free Univ'],
-           ['Berlin','Freie','Univ'], ['Univ', 'Libre', 'Berlin']]
+FUnames = [['Berlin', 'FU'], ['Berlin', 'Free Univ'],
+           ['Berlin', 'Freie', 'Univ'], ['Univ', 'Libre', 'Berlin']]
 FU = Inst('FU', FUnames)
 
 # HU
@@ -719,13 +719,13 @@ HTWnames = [['HTW', 'Berlin'],
 HTW = Inst('HTW', HTWnames)
 
 # HWR
-HWRnames = [['HWR','Berlin'],
-            ['Wirt','Recht','Berlin'],
+HWRnames = [['HWR', 'Berlin'],
+            ['Wirt', 'Recht', 'Berlin'],
             ['Berlin', 'Economics', 'Law', 'School']]
 HWR = Inst('HWR', HWRnames)
 
 # Alice Salomon
-ASHnames = [['Alice','Salomon','Berlin'], ['ASH','Berlin'],
+ASHnames = [['Alice', 'Salomon', 'Berlin'], ['ASH', 'Berlin'],
             ['Universidad Alice Salomon']]
 ASH = Inst('ASH', ASHnames)
 
@@ -786,7 +786,7 @@ leDat = len(datenbanken)
 dbNameID = {datenbanken[i].idNummer: datenbanken[i].name for i in range(leDat)}
 
 # Read in database contents from text-files
-if doReadIn == True:
+if doReadIn:
     # Read in the 'Web of Science' file and extract the relevant information.
     contentWoS = []
     with open('input-files/wos2016.txt') as f:
@@ -902,7 +902,7 @@ if doReadIn == True:
     # Transform all characters in DOIs to lower case
     for item in datenbanken:
         for article in item.content:
-            if article.DOI != None:
+            if article.DOI is not None:
                 article.DOI = article.DOI.lower()
 
 
@@ -910,13 +910,13 @@ if doReadIn == True:
 
 # Calls the function 'dubletten' above and prints statistics or reads in data
 # from previous run of the script
-if doReadIn == True:
+if doReadIn:
     print 'Remove Duplicates:'
     print 'Number of records in "Web of Science": ', len(contentWoS)
     finalList = dubletten(1, contentWoS, None, None)
     with open('finalList', "wb") as f:
         pickle.dump(finalList, f)
-elif doReadIn == False:
+elif not doReadIn:
     with open('finalList', "rb") as f:
         finalList = pickle.load(f)
 
@@ -925,7 +925,7 @@ seen = set()
 seen1 = set()
 doubles = []
 for x in finalList:
-    if x.DOI != '' and x.DOI != None:
+    if x.DOI != '' and x.DOI is not None:
         if x.DOI not in seen:
             seen.add(x.DOI)
         else:
@@ -963,11 +963,11 @@ for item in finalList:
 # schemes being present in the data. This approach is suboptimal and shoud
 # be cleaned up and rewritten
 for item in finalList:
-    if item.dbID == 13 and item.corrAuth != None:
+    if item.dbID == 13 and item.corrAuth is not None:
         if item.corrAuth[0:2] == '; ':
             g = item.authors.split('; ')[0]
             setattr(item, 'corrAuth', g + getattr(item, 'corrAuth'))
-        if item.affiliations == '' or item.affiliations == None:
+        if item.affiliations == '' or item.affiliations is None:
             item.affiliations = item.corrAuth
         g = item.authors.split('; ')
         for auto in g:
@@ -984,11 +984,11 @@ for item in finalList:
 for item in finalList:
     if item.corrAuth not in [None, '']:
         i, j = listCheck(item.corrAuth, 0)
-        if i == True:
+        if i:
             item.nameVariant = j
     if item.affiliations not in [None, '']:
         k, l = listCheck(item.affiliations, 1)
-        if k == True:
+        if k:
             item.allNameVariants = l
 
 
@@ -997,12 +997,12 @@ for item in finalList:
 # Reads in the file with the data from DOAJ and crossreferences it with the
 # ISSNs and eISSNs from the database data.
 # Add information about the subject, publisher and journal licence
-doaj = np.loadtxt('input-files/doaj.txt', dtype = 'string', comments = '$#',
-                  skiprows = 1, delimiter = '\t',
-                  usecols = (3, 4, 0, 56, 11, 12, 5, 44, 29))
+doaj = np.loadtxt('input-files/doaj.txt', dtype='string', comments='$#',
+                  skiprows=1, delimiter='\t',
+                  usecols=(3, 4, 0, 56, 11, 12, 5, 44, 29))
 print 'Finished reading in DOAJ data'
-issns = collections.Counter(doaj[:,0])
-eissns = collections.Counter(doaj[:,1])
+issns = collections.Counter(doaj[:, 0])
+eissns = collections.Counter(doaj[:, 1])
 for item in finalList:
     if item.ISSN == '':
         item.ISSN = None
@@ -1018,10 +1018,10 @@ print 'Finished identifying OA articles'
 # missing ISSNs and crossreference them with the DOAJ
 if contactCR == 1:
     nonOA = [item for item in finalList
-             if item.oaStatus == None
-             and item.DOI != None
+             if item.oaStatus is None
+             and item.DOI is not None
              and item.DOI != ''
-             and item.ISSN == None and item.eISSN == None]
+             and item.ISSN is None and item.eISSN is None]
     newlyISSNed = askCR(nonOA)
     with open('CRResults', "wb") as f:
         pickle.dump(newlyISSNed, f)
@@ -1038,7 +1038,7 @@ elif contactCR == 2:
 # OA-Status and to add publisher info.
 if contactOaDOI == 1:
     toOaDOI = [item for item in finalList if item.DOI not in [None, '']
-               and item.oaStatus == None]
+               and item.oaStatus is None]
     askOaDOI(toOaDOI)
 elif contactOaDOI == 2:
     c = 0
@@ -1072,7 +1072,7 @@ oaDOI[license]\tAPC Amount\tAPC Currency'
 if checkToDo == 1:
     np.savetxt('output-files/docsToBeChecked.txt',
                [item.arry() for item in toCheck],
-               delimiter='\t', header = ch, comments = '', fmt='"%s"')
+               delimiter='\t', header=ch, comments='', fmt='"%s"')
 
 # Read in articles that were checked by hand and were found to have a
 # first/corresponding author from a relevant institution.
@@ -1106,8 +1106,8 @@ elif checkToDo == 2:
     if dontknow != []:
         np.savetxt('output-files/docsCheckedCantFind.txt',
                    [item for item in dontknow],
-                   delimiter='\t', header = 'Title\tDOI\tAffiliation',
-                   comments = '', fmt='"%s"')
+                   delimiter='\t', header='Title\tDOI\tAffiliation',
+                   comments='', fmt='"%s"')
 
 
 # ---------------- 11. Print final results and estimate APCs ------------------
@@ -1122,7 +1122,7 @@ print 'Number of hybrid OA articles ', oaHybridNumber, '\n'
 oaGreenNumber = len([item for item in finalList if item.oaStatus == 'green'])
 print 'Number of green OA articles ', oaGreenNumber, '\n'
 corrAuthNumber = len([item for item in finalList if item.oaStatus == 'gold'
-                      and item.nameVariant != None])
+                      and item.nameVariant is not None])
 print 'Number of articles in DOAJ-journals where author from relevant \
 institution is corresponding author: ', corrAuthNumber, '\n'
 
@@ -1131,7 +1131,7 @@ print u'Estimated APCs (assume 1481 €): ', corrAuthNumber * 1481, u' €\n'
 
 # Estimate APCs based on DOAJ
 withAPC = [item for item in finalList if item.oaStatus == 'gold'
-           and item.nameVariant != None and item.APCValue != None]
+           and item.nameVariant is not None and item.APCValue is not None]
 allCurrencies = set([item.APCCurrency for item in withAPC])
 APCAmounts = [[0 for x in range(2)] for y in range(len(allCurrencies))]
 h = 0
@@ -1148,23 +1148,23 @@ for h in range(len(allCurrencies)):
 
 # Save results to file
 np.savetxt('output-files/allPubs.txt', [item.arry() for item in finalList],
-           delimiter='\t', header = ch, comments = '', fmt='"%s"')
+           delimiter='\t', header=ch, comments='', fmt='"%s"')
 
 
 # ------------------------- 12. Basic Statistics ------------------------------
 
 # Figure out how many of each kind of publication for each year, display this
 # in a table and save data to file
-if doAnalysis == True:
+if doAnalysis:
     # Count OA/Hybrid/CorrAuth for every year in dataset
-    yearsAll = [int(x.year) for x in finalList if x.year != None]
-    yearsOA = [int(x.year) for x in finalList if x.year != None
+    yearsAll = [int(x.year) for x in finalList if x.year is not None]
+    yearsOA = [int(x.year) for x in finalList if x.year is not None
                and x.oaStatus == 'gold']
-    yearsOACorr = [int(x.year) for x in finalList if x.year != None
-                   and x.nameVariant != None and x.oaStatus == 'gold']
-    yearsHybrid = [int(x.year) for x in finalList if x.year != None
+    yearsOACorr = [int(x.year) for x in finalList if x.year is not None
+                   and x.nameVariant is not None and x.oaStatus == 'gold']
+    yearsHybrid = [int(x.year) for x in finalList if x.year is not None
                    and x.oaStatus == 'hybrid']
-    yearsGreen = [int(x.year) for x in finalList if x.year != None
+    yearsGreen = [int(x.year) for x in finalList if x.year is not None
                    and x.oaStatus == 'green']
     years = sorted(list(set(yearsAll)))
     lenyr = len(years)
@@ -1187,14 +1187,14 @@ if doAnalysis == True:
         pubOACorr[i] = yearsOACorr.count(years[i])
         pubHybrid[i] = yearsHybrid.count(years[i])
         pubGreen[i] = yearsGreen.count(years[i])
-        percOA[i] = round(float(100 * pubOA[i])/float(pubAll[i]),1)
+        percOA[i] = round(float(100 * pubOA[i])/float(pubAll[i]), 1)
         if pubOA[i] > 0:
-            percOACorr[i] = round(float(100 * pubOACorr[i])/float(pubOA[i]),1)
+            percOACorr[i] = round(float(100 * pubOACorr[i])/float(pubOA[i]), 1)
         else:
             percOACorr[i] = 0
         if pubAll[i] > 0:
-            percHybrid[i] = round(float(100 * pubHybrid[i])/float(pubAll[i]),1)
-            percGreen[i] = round(float(100 * pubGreen[i])/float(pubAll[i]),1)
+            percHybrid[i] = round(float(100 * pubHybrid[i])/float(pubAll[i]), 1)
+            percGreen[i] = round(float(100 * pubGreen[i])/float(pubAll[i]), 1)
         else:
             percHybrid[i] = 0
             percGreen[i] = 0
@@ -1220,21 +1220,21 @@ if doAnalysis == True:
     pubHybrid.append(sum(pubHybrid))
     pubGreen.append(sum(pubGreen))
     pubOACorr.append(sum(pubOACorr))
-    percOACorr.append(round(float(100 * sum(pubOACorr))/float(sum(pubOA)),1))
-    percOA.append(round(float(100 * sum(pubOA))/float(sum(pubAll)),1))
-    percHybrid.append(round(float(100 * sum(pubHybrid))/float(sum(pubAll)),1))
-    percGreen.append(round(float(100 * sum(pubGreen))/float(sum(pubAll)),1))
+    percOACorr.append(round(float(100 * sum(pubOACorr))/float(sum(pubOA)), 1))
+    percOA.append(round(float(100 * sum(pubOA))/float(sum(pubAll)), 1))
+    percHybrid.append(round(float(100 * sum(pubHybrid))/float(sum(pubAll)), 1))
+    percGreen.append(round(float(100 * sum(pubGreen))/float(sum(pubAll)), 1))
 
     # Save results to file
     ch = 'year\tNo. Publications\tNo. OA Publications\t% OA Publications\t\
     No. Hybrid Publications\t% Hybrid Publications\tNo. Green Publications\t\
     % Green Publications\tNo. OA Publications + Corr. Author\t\
     % OA Publications with Corr. Auth'
-    OAStats = map(list,map(None,*[years, pubAll, pubOA, percOA, pubHybrid,
+    OAStats = map(list, map(None, *[years, pubAll, pubOA, percOA, pubHybrid,
                                   percHybrid, pubGreen, percGreen, pubOACorr,
                                   percOACorr]))
     np.savetxt('output-files/statistics_OA.txt', OAStats,
-               delimiter='\t', header = ch, comments = '', fmt='"%s"')
+               delimiter='\t', header=ch, comments='', fmt='"%s"')
 
     # Add last line to table in console
     v1 = str(pubOA[-1]) + ' ~ ' + str(percOA[-1]) + ' %'
@@ -1249,12 +1249,12 @@ if doAnalysis == True:
     print u'Percentages for Gold OA and hybrid and green publications refer \
 to the overall number of articles. The percentage for OA publications \
 with a corresponding author from a relevant institution refer to the \
-number of gold OA publications. ' , str(len(finalList) - pubAll[-1]), \
+number of gold OA publications. ', str(len(finalList) - pubAll[-1]), \
 'publications were not included in this table, because the data provided \
 by the database does not contain a year.'
 
 # Do statistics for publishers of OA articles and save results to file
-if doAnalysis == True:
+if doAnalysis:
     publishersAll = [x.publisher for x in finalList if x.oaStatus == 'gold']
     pAN = float(len(publishersAll))
     publishers = collections.Counter(publishersAll)
@@ -1270,7 +1270,7 @@ if doAnalysis == True:
     for i in range(0, pN):
         if haeuf[i][0] == '':
             noPubl[2] += haeuf[i][1]
-        elif haeuf[i][0] == None:
+        elif haeuf[i][0] is None:
             noPubl[2] += haeuf[i][1]
         else:
             tally += haeuf[i][1]
@@ -1284,9 +1284,9 @@ if doAnalysis == True:
     noPubl[3] = round(100. * noPubl[2]/pAN, 2)
     noPubl[4] = round(100. * tally/pAN, 2)
     publisherStats.append(noPubl)
-    publisherStats = [item for item in publisherStats if item != None]
+    publisherStats = [item for item in publisherStats if item is not None]
     ch = 'Rank\tPublisher\t# Publications\t% Publications\t\
     Cumulative % of Publications'
     np.savetxt('output-files/statistics_goldPublishers.txt', publisherStats,
-                   delimiter='\t', header = ch, comments = '', fmt='"%s"')
+                   delimiter='\t', header=ch, comments='', fmt='"%s"')
     print tb
