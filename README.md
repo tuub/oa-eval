@@ -18,6 +18,8 @@ A full manual in German is available as [PDF file](/manual.pdf) and [LaTeX proje
 * output files,
 * how to add or delete databases from the analysis.
 
+Please note: Some compatibility issues have cropped up since NumPy v1.14 was released last year. The script should work with NumPy v1.12. An updated version of the script should become available during the summer.
+
 ## Contribution history
 The python script was developed mainly by [Eva Bunge](https://github.com/ebunge) with support from [Michaela Voigt](https://github.com/michaelavoigt). The script is maintained by the Open Access team of TU Berlin University Library.
 
