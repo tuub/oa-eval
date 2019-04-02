@@ -433,7 +433,7 @@ def pubmedFormat(pmRecords, ind):
     return records
 
 # Read in table mapping RIS-fields of databases to document-attributes
-risFields = np.genfromtxt('RIS-fields.csv', delimiter=';', dtype=None)
+risFields = np.genfromtxt('RIS-fields.csv', delimiter=';', dtype=None, encoding='UTF-8')
 
 # Valid characters for ISSNs
 numX = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X']
