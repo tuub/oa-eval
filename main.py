@@ -17,6 +17,7 @@ import weakref
 from prettytable import PrettyTable
 import urllib2
 import json
+import os
 
 # ----------------- 1. Enable/Disable Functionalities -------------------------
 
@@ -912,7 +913,48 @@ if doReadIn:
             if article.DOI is not None:
                 article.DOI = article.DOI.lower()
 
+    #
+    # For debugging: Export the data before deduplication 
+    #
+    output_dir = 'normalized-db-files'
+    try:
+        if not os.path.exists(output_dir): os.makedirs(output_dir)
+        
+        allPubs_temp = []
+        
+        for db in datenbanken:
+            '''
+            Save normalized publication data to a tab-seperated file 
+            (one line per publication)
+            '''
+            
+            allPubs_temp += db.content
+            
+            ch = 'authors\ttitle\tOA-Status\tDOI\tjournal\tISSN\teISSN\tpublisher\tyear\t\
+            affiliations\tall identified name variants\tcorresponding author\t\
+            found name variant\te-mail\tsubject\tDOAJ subject\tfunding\tlicence\t\
+            databaseID\tnotes\toaDOI[is_oa]\toaDOI[journal_is_oa]\toaDOI[host_type]\t\
+            oaDOI[license]\tAPC Amount\tAPC Currency'
+            
+            filename = output_dir + '/' + db.name.replace(' ', '_') + '.txt'
+            
+            np.savetxt(filename, [item.arry() for item in db.content],
+                       delimiter='\t', header = ch, comments = '', fmt='"%s"')
 
+        np.savetxt(output_dir + '/allPub_normalized_before_deduplication.txt', [item.arry() for item in allPubs_temp],
+                   delimiter='\t', header = ch, comments = '', fmt='"%s"')
+        
+        print 'Data exported to directory "' + output_dir + '"'    
+            
+    except OSError:
+        print ('Error: Creating directory. ' +  directory)
+
+    finally:
+        # delete variable to clear memory
+        del allPubs_temp
+
+
+        
 # ----------------------- 5. Duplicate Check ----------------------------------
 
 # Calls the function 'dubletten' above and prints statistics or reads in data
