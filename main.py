@@ -247,7 +247,7 @@ def askOaDOI(needInfo):
     print 'Begin contacting Unpaywall'
     baseurl = 'https://api.unpaywall.org/v2/'
     relKeys = {1: 'is_oa', 2: 'journal_is_oa', 3: 'host_type', 4: 'license',
-               5: 'publisher'}
+               5: 'publisher', 6:'version'}
     replies = [[0 for x in range(7)] for y in range(len(needInfo))]
     i = 0
     errDOIs = []
@@ -274,7 +274,7 @@ def askOaDOI(needInfo):
                 doc.checks += 'Identified via Unpaywall '
             elif replies[i][1] and not replies[i][2] \
                                        and replies[i][3] == 'publisher':
-                if 'cc' in str(replies[i][4]):
+                if 'publishedVersion' in str(replies[i][6]) and 'cc' in str(replies[i][4]):
                     doc.oaStatus = 'hybrid'
                     doc.checks += 'Identified via Unpaywall '
             doc.oaDOI1 = replies[i][1]
