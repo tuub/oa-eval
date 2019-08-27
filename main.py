@@ -262,6 +262,10 @@ def askOaDOI(needInfo):
             for item in relKeys:
                 if relKeys[item] in response:
                     replies[i][item] = response[relKeys[item]]
+                
+                # if the key cannot be found in the response (on the top level) 
+                # but there is an entry 'best_oa_location' that has an entry for
+                # that key then take that value.  
                 elif 'best_oa_location' in response:
                     subresponse = response['best_oa_location']
                     if subresponse is not None:
