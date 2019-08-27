@@ -690,7 +690,14 @@ TU = Inst('TU', TUnames)
 Cnames = [['Charit', 'Univ'],
           ['Campus', 'Virchow', 'Berlin'],
           ['Campus', 'Franklin', 'Berlin'],
-          ['Charit', 'Berlin']]
+          ['Campus', 'Buch', 'Berlin'],
+          ['Campus', 'Mitte', 'Berlin'],
+          ['Charit', 'Berlin'],
+          ['Berlin', 'Inst', 'Health'],
+          ['Berlin', 'Inst', 'Gesundheitsforschung'],
+          ['medizin', 'Berlin'],
+          ['Medical', 'Univ', 'Berlin'],
+          ['Medical', 'School', 'Berlin']]
 Charite = Inst('Charité', Cnames)
 
 # FU
