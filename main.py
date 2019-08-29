@@ -18,6 +18,7 @@ from prettytable import PrettyTable
 import urllib2
 import json
 import os
+import re
 
 # ----------------- 1. Enable/Disable Functionalities -------------------------
 
@@ -465,7 +466,11 @@ def risFormat(risRecords, ind):
                                   '', None, None, None, None, ind)
             if twoL.isupper() and line[2] == ' ':
                 if twoL in relMap:
+                    
+                    # Mapping aus Datei RIS-fields.csv
                     ab = str(risFields[np.where(relMap == twoL)[0], 0][0])
+                    
+                    # Attribut ist noch leer (also z.B. der erste Autor, etc.)
                     if getattr(newDoc, ab) in ('', None):
 
                         # Authors
@@ -544,17 +549,17 @@ def risFormat(risRecords, ind):
                                         q2 = textL.find('Document Type:') - 2
                                     if q2 < 0:
                                         q2 = textL.find('Release Date:') - 2
-                                    q3 = textL[q1:].find(' 2:')
-                                    if q3 < 0:
+                                    q3 = textL[q1:].find(' 2:')  # Affiliationen werden durchnummeriert
+                                    if q3 < 0:                   
                                         q3 = textL[q1:].find(' 2 :')
-                                    if q3 > 0:
-                                        qd = q1 + q3
+                                    if q3 > 0:                   # es gibt eine zweite Affiliation
+                                        qd = q1 + q3 # q1 = Beginn der 1. Affiliation, q3 = Beginn der zweiten Affiliation
                                     else:
                                         qd = q2
                                     if getattr(newDoc, 'corrAuth') is None:
                                         setattr(newDoc, 'corrAuth', '')
                                     setattr(newDoc, 'corrAuth',
-                                            beTe + "; " + textL[q1:qd])
+                                            beTe + "; " + textL[q1:qd])    # die 1. Affiliation
                                 # SportDiscus
                                 elif ind == 17:
                                     q2 = textL.find('No. of Pages:') - 2
@@ -628,6 +633,267 @@ def risFormat(risRecords, ind):
         records.append(newDoc)
     return records
 
+def set_attribute_by_concatenating_tags(attribute, tag_list, publication, newDoc):
+    # just concatenate the strings belonging to the tags in the tag_list; separate values with '; '  
+    result_list = []
+    for tag in tag_list:
+        if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+            result_list.extend(publication[tag])
+
+    if result_list:
+        setattr(newDoc, attribute, '; '.join(result_list))
+    
+
+def risFormatNew(risRecords, ind):
+    records = []
+
+    # 
+    # read file, put data in data structure
+    #
+    publication_data = []
+    with open(risRecords, 'rU') as f:
+        for line in f:
+            if line.strip(): # ignore empty lines
+                tag  = line[0:2]
+                line = line[6:-1]
+                
+                # Start of a new record?
+                if tag == 'TY' or (ind == 12 and tag == 'ID'):
+                     publication_data.append({})
+
+                # enter line in data list
+                # is there an entry for that tag?
+                if not tag in publication_data[-1]:
+                    publication_data[-1][tag] = []
+                    
+                publication_data[-1][tag].append(line)
+
+    #
+    # Auswertung
+    #
+
+    # get col from file RIS-fields.csv
+    ris_tags = {}
+    
+    for col_nr_db in range(len(risFields[0])):
+        if str(ind) == risFields[0][col_nr_db]:
+            break
+    
+    # get RIS-Tags for fields
+    for line_nr in range(1, len(risFields)):
+        attribute = risFields[line_nr][0]
+        if not attribute in ris_tags:
+            ris_tags[attribute] = []
+        
+        if risFields[line_nr][col_nr_db]: # falls Feld nicht leer
+            ris_tags[attribute].append(risFields[line_nr][col_nr_db])
+    
+    
+    #
+    # extract data for each publication
+    #
+    for publication in publication_data:
+        newDoc = Document('', '', None, None, None, None, None, None, '', None, None, None, None, ind)
+        records.append(newDoc)
+
+        # take fields as is; concatenate with ; if several tags 
+        for attribute in ['authors', 'title', 'journal', 'publisher']:
+            set_attribute_by_concatenating_tags(attribute, ris_tags[attribute], publication, newDoc)
+        
+        # affiliations
+        attribute = 'affiliations'
+        if ind in [4, 7, 10, 11, 12]:
+            set_attribute_by_concatenating_tags(attribute, ris_tags[attribute], publication, newDoc)
+        
+        elif ind in [13]:
+            # nehme Affiliatin aus 'AD', wenn vorhanden, sonst 'N1'
+            for tag in ris_tags[attribute]:
+                if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                    # Affiliationen stehen häfig im Notiz-feld N1; ist aber Fallback, nehme N1 nur, wenn es kein anderes Feld gibt!
+                    if tag != 'N1':
+                        attribute_string = '; '.join(publication[tag])
+                        setattr(newDoc, attribute, attribute_string)
+                        break # danach keine weiteren Tags mehr auswerten!
+                    elif tag == 'N1':
+                        attribute_string = '; '.join(publication[tag])
+                        # Affiliationen stehen im Notizfeld zusammen mit anderen Angaben
+                        # wird mit "Affiliations: " eingeleitet
+                        # angaben danach eingeleitet mit : 'Source Info:', 'Issue Info:', 'Document Type:' oder 'Release Date:'
+                        m = re.search('Affiliations?: +(.+?) +(Source Info:|Issue Info:|Document Type:|Release Date:)', attribute_string)
+                        if m:
+                            substring = m.group(1)
+                            
+                            # split into affiliations; each is marked by 1: , 2: , etc, 
+                            # wichtig: vor der Zahl muss whitespace sein, sonst erwischt man etwas anderes
+                            affiliations_list = re.split("\s[0-9]+\s*:\s*", ' ' + substring)
+                            
+                            new_affiliations_string = ''
+                            for aff in affiliations_list:
+                                if aff.strip(): # ignore empty entries
+                                    aff = aff.strip()
+                                    aff = re.sub(r'\s*;$','',aff) # strip ; from end
+                                    if new_affiliations_string: 
+                                        new_affiliations_string += '; '
+                                    new_affiliations_string += aff
+                            
+                            setattr(newDoc, attribute, new_affiliations_string)
+  
+        # DOI
+        attribute = 'DOI'
+        result_string = ''
+        if ind in [13]:
+            for tag in ris_tags[attribute]:
+                if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                    if tag != 'N1':
+                        for attribute_string in publication[tag]:
+                            if 'doi.org' in attribute_string or attribute_string.startswith('10.'):
+                                result_string = attribute_string
+                                break # nehme nur die erste DOI
+                        if result_string: # falls Ergebnis, ddanach keine weiteren Tags mehr auswerten!
+                            break 
+                            
+                    else: # N1
+                        attribute_string = '; '.join(publication[tag])
+                        m = re.search('DOI: +([^\s]+)', attribute_string)
+                        if m:
+                            result_string = m.group(1).strip(' .')
+            
+            if result_string.strip():
+                result_string = result_string.strip()
+                if 'doi.org' in result_string:
+                    result_string = result_string[result_string.find('doi.org') + 8:]
+                
+                setattr(newDoc, attribute, result_string)
+            
+            
+        else:
+            set_attribute_by_concatenating_tags(attribute, ris_tags[attribute], publication, newDoc)
+
+        result_string = None
+        
+        
+        # ISSN, eISSN
+        attribute = 'ISSN'
+        for tag in ris_tags[attribute]:
+            if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                for attribute_string in publication[tag]: # falls es mehrere Tags gibt        
+                    
+                    if attribute_string[0:4] != '978-': 
+                        anInt = filter(lambda x: x in numX, attribute_string)
+
+                        if anInt != '':
+                            # das erste Tag
+                            if getattr(newDoc, attribute) in ('', None):
+                                setattr(newDoc, attribute, anInt[0:4] + '-' + anInt[4:8])
+                                if len(anInt) > 8:
+                                    setattr(newDoc, 'eISSN', anInt[8:12] + '-' + anInt[12:16])
+                                
+                            # zweites Tag = Elektronisch
+                            else:
+                                setattr(newDoc, 'eISSN', anInt[0:4] + '-' + anInt[4:8])
+                    
+        
+        # year
+        attribute = 'year'
+        for tag in ris_tags[attribute]:
+            if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                attribute_string = publication[tag][0] # nehme das erste Tag, ignoriere weitere 
+                if len(attribute_string) > 4:
+                    result = int(attribute_string[:4]) # beginnt mit der Jahreszahl 
+                else:
+                    result = int(attribute_string)
+                    
+                setattr(newDoc, attribute, result)
+        
+
+        # corrAuth
+        attribute = 'corrAuth'
+
+        if ris_tags[attribute]:
+            set_attribute_by_concatenating_tags(attribute, ris_tags[attribute], publication, newDoc)
+        
+        else:
+            # nehme ersten Autor + erste Affiliation
+            result_list = []
+            
+            att_authors      = getattr(newDoc, 'authors')
+            att_affiliations = getattr(newDoc, 'affiliations')
+            
+            if att_authors:
+                # if more than one author: normally separated by ;
+                first_author = att_authors.split('; ')[0]                    
+                result_list.append(first_author)
+                    
+            if att_affiliations:
+                # if more than one affiliation: normally separated by ;
+                first_affiliation = att_affiliations.split('; ')[0]
+                result_list.append(first_affiliation)
+                    
+        
+        if result_list:
+            setattr(newDoc, attribute, '; '.join(result_list))
+        
+        result_list = None
+        
+        
+        # eMail
+        attribute = 'eMail'
+        
+        if ind == 13:
+            result_string = ''
+            attribute_string_list = []
+            for tag in ris_tags['affiliations']:
+                if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                    # Affiliationen stehen häfig im Notiz-feld N1; ist aber Fallback, nehme N1 nur, wenn es kein anderes Feld gibt!
+                    attribute_string_list.extend(publication[tag])
+                    if tag != 'N1':
+                        break # danach keine weiteren Tags mehr auswerten!
+
+            m = re.search('Email Address:\s*([^\s;]+)', '; '.join(attribute_string_list))
+            if m:
+                result_string = m.group(1).strip()
+                
+            if result_string:
+                setattr(newDoc, attribute, result_string)
+                
+            result_string = None
+            
+#                         # Corresponding Authors
+#                         elif ab == 'corrAuth' and ind == 14:
+#                             setattr(newDoc, ab, textL)
+#                             p1 = textL.find('E-mail:')
+#                             if p1 > 0:
+#                                 p1 += 8
+#                                 setattr(newDoc, 'eMail', textL[p1:].strip(';'))
+#                         elif ab == 'corrAuth' and ind == 16:
+#                             if 'Correspondence Address' in textL:
+#                                 o1 = textL.find('Correspondence Address') + 24
+#                                 setattr(newDoc, ab, textL[o1:])
+#                             if 'email' in textL:
+#                                 o2 = textL.find('email:') + 7
+#                                 setattr(newDoc, 'eMail', textL[o2:])
+#                         elif ab == 'affiliations' and ind in [9, 13, 17]:
+#         
+#                             # Find E-Mail-Adresses
+#                             if ind == 17:
+#                                 p1 = textL.find('email:')
+#                             else:
+#                                 p1 = textL.find('Email Address:')
+#                             if p1 > 0:
+#                                 if ind == 17:
+#                                     p1 += 7
+#                                 else:
+#                                     p1 += 15
+#                                 if ind == 9:
+#                                     p2 = textL[p1:-1].find(';')
+#                                 elif ind == 13:
+#                                     p2 = textL[p1:-1].find(' ')
+#                                 elif ind == 17:
+#                                     p2 = textL[p1:-1].find('. ')
+#                                 setattr(newDoc, 'eMail', textL[p1:p1 + p2].strip(';'))
+        
+    return records
+    
 # List of consonants
 co = ('b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r',
           's', 't', 'v', 'w', 'x', 'y', 'z', 'B', 'C', 'D', 'F', 'G', 'H', 'J',
@@ -773,21 +1039,21 @@ TU.nameVar1 = [['Technische Universitat Berlin'],
 # The order of the databases here determines the order in which they are
 # considered. Therefore databases with good/complete metadata should be near
 # the top
-dbWoS = Database('Web of Science', 1)
-dbSF = Database('SciFinder', 2)
-dbPM = Database('PubMed', 3)
-dbScopus = Database('Scopus', 16)
-dbInspec = Database('Inspec', 5)
-dbTEMA = Database('TEMA', 4)
-dbPQ = Database('ProQuest', 7)
-dbBSC = Database('Business Source Complete', 9)
-dbGf = Database('GeoRef', 10)
-dbCIN = Database('CINAHL', 12)
-dbLisa = Database('LISA', 15)
-dbCAB = Database('CAB Abstracts', 11)
-dbEm = Database('Embase', 14)
-dbSD = Database('SportDiscus', 17)
-dbIEEE = Database('IEEE', 6)
+# dbWoS = Database('Web of Science', 1)
+# dbSF = Database('SciFinder', 2)
+# dbPM = Database('PubMed', 3)
+# dbScopus = Database('Scopus', 16)
+# dbInspec = Database('Inspec', 5)
+# dbTEMA = Database('TEMA', 4)
+# dbPQ = Database('ProQuest', 7)
+# dbBSC = Database('Business Source Complete', 9)
+# dbGf = Database('GeoRef', 10)
+# dbCIN = Database('CINAHL', 12)
+# dbLisa = Database('LISA', 15)
+# dbCAB = Database('CAB Abstracts', 11)
+# dbEm = Database('Embase', 14)
+# dbSD = Database('SportDiscus', 17)
+# dbIEEE = Database('IEEE', 6)
 dbEB = Database('EBSCO', 13)
 
 # List the databases
@@ -800,113 +1066,115 @@ dbNameID = {datenbanken[i].idNummer: datenbanken[i].name for i in range(leDat)}
 # Read in database contents from text-files
 if doReadIn:
     # Read in the 'Web of Science' file and extract the relevant information.
-    contentWoS = []
-    with open('input-files/wos2017.txt') as f:
-        ic = 0
-        for line in f:
-            fields = line.split('\t')
-            if ic > 0:
-                contentWoS.append(Document(fields[1], fields[8], fields[54],
-                                 fields[9], fields[38], fields[39], fields[35],
-                                 fields[44], fields[22], fields[23],
-                                 fields[24], fields[59], fields[27],
-                                 dbWoS.idNummer))
-            else:
-                ic += 1
-    dbWoS.content = contentWoS
-    print 'Finished reading in Web of Science'
-
-    # Read in the 'SciFinder' files and extract the relevant information.
-    contentSF = []
-    with open('input-files/sf2017.txt', 'rU') as f:
-        ic = 0
-        for line in f:
-            fields = line.split('\t')
-            if ic > 0:
-                contentSF.append(Document(fields[6].strip('"'),
-                                fields[3].strip('"'),
-                                fields[49].strip('\n').strip('\r').strip('"'),
-                                fields[17].strip('"'), fields[15].strip('"'),
-                                None, None, fields[22].strip('"'),
-                                fields[11].strip('"'), fields[11].strip('"'),
-                                None, fields[9].strip('"'), None,
-                                dbSF.idNummer))
-            else:
-                ic += 1
-    dbSF.content = contentSF
-    for item in dbSF.content:
-        firstAuthor = item.authors.split('; ')[0]
-        item.corrAuth = firstAuthor + '; ' + item.corrAuth
-    print 'Finished reading in SciFinder'
-
-    # Read in 'PubMed' file and extract relevant information.
-    dbPM.content = pubmedFormat('input-files/pubmed2017.txt', dbPM.idNummer)
-    print 'Finished reading in PubMed'
-
-    # Read in 'Scopus' file and extract relevant information.
-    dbScopus.content = risFormat('input-files/scopus2017.ris',
-                                 dbScopus.idNummer)
-    print 'Finished reading in Scopus'
-
-    # Read in 'Inpsec' file and extract relevant information.
-    contentInspec = []
-    with open('input-files/inspec2017.txt') as f:
-        ic = 0
-        for line in f:
-            fields = line.split('\t')
-            if ic > 0:
-                contentInspec.append(Document(fields[6], fields[5], fields[51],
-                                    fields[12], fields[50], None, fields[41],
-                                    fields[13], fields[35],
-                                    inspecCorrAuth(fields[6], fields[35]),
-                                    None, None, None, dbInspec.idNummer))
-            else:
-                ic += 1
-    dbInspec.content = contentInspec
-    print 'Finished reading in Inspec'
-
-    # Read in 'TEMA' file and extract relevant information.
-    dbTEMA.content = risFormat('input-files/tema2017.ris', dbTEMA.idNummer)
-    print 'Finished reading in TEMA'
-
-    # Read in 'ProQuest' file and extract relevant information.
-    dbPQ.content = risFormat('input-files/pq2017.ris', dbPQ.idNummer)
-    print 'Finished reading in ProQuest'
-
-    # Read in 'Business Source Complete' file and extract relevant information.
-    dbBSC.content = risFormat('input-files/bsc2017.ris', dbBSC.idNummer)
-    print 'Finished reading in Business Source Complete'
-
-    # Read in 'GeoRef' file and extract relevant information.
-    dbGf.content = risFormat('input-files/gf2017.ris', dbGf.idNummer)
-    print 'Finished reading in GeoRef'
-
-    # Read in 'CINAHL' file and extract relevant information.
-    dbCIN.content = risFormat('input-files/cinahl2017.ris', dbCIN.idNummer)
-    print 'Finished reading in CINAHL'
-
-    # Read in 'LISA' file and extract relevant information.
-    dbLisa.content = risFormat('input-files/lisa2017.ris', dbLisa.idNummer)
-    print 'Finished reading in LISA'
-
-    # Read in 'CAB Abstracts' file and extract relevant information.
-    dbCAB.content = risFormat('input-files/cab2017.ris', dbCAB.idNummer)
-    print 'Finished reading in CAB Abstracts'
-
-    # Read in 'Embase' file and extract relevant information.
-    dbEm.content = risFormat('input-files/embase2017.ris', dbEm.idNummer)
-    print 'Finished reading in Embase'
-
-    # Read in 'SportDiscus' file and extract relevant information.
-    dbSD.content = risFormat('input-files/sd2017.ris', dbSD.idNummer)
-    print 'Finished reading in Sport Discus'
-
-    # Read in 'IEEE' file and extract relevant information.
-    dbIEEE.content = risFormat('input-files/IEEE2017.ris', dbIEEE.idNummer)
-    print 'Finished reading in IEEE'
+#     contentWoS = []
+#     with open('input-files/wos2017.txt') as f:
+#         ic = 0
+#         for line in f:
+#             fields = line.split('\t')
+#             if ic > 0:
+#                 contentWoS.append(Document(fields[1], fields[8], fields[54],
+#                                  fields[9], fields[38], fields[39], fields[35],
+#                                  fields[44], fields[22], fields[23],
+#                                  fields[24], fields[59], fields[27],
+#                                  dbWoS.idNummer))
+#             else:
+#                 ic += 1
+#     dbWoS.content = contentWoS
+#     print 'Finished reading in Web of Science'
+# 
+#     # Read in the 'SciFinder' files and extract the relevant information.
+#     contentSF = []
+#     with open('input-files/sf2017.txt', 'rU') as f:
+#         ic = 0
+#         for line in f:
+#             fields = line.split('\t')
+#             if ic > 0:
+#                 contentSF.append(Document(fields[6].strip('"'),
+#                                 fields[3].strip('"'),
+#                                 fields[49].strip('\n').strip('\r').strip('"'),
+#                                 fields[17].strip('"'), fields[15].strip('"'),
+#                                 None, None, fields[22].strip('"'),
+#                                 fields[11].strip('"'), fields[11].strip('"'),
+#                                 None, fields[9].strip('"'), None,
+#                                 dbSF.idNummer))
+#             else:
+#                 ic += 1
+#     dbSF.content = contentSF
+#     for item in dbSF.content:
+#         firstAuthor = item.authors.split('; ')[0]
+#         item.corrAuth = firstAuthor + '; ' + item.corrAuth
+#     print 'Finished reading in SciFinder'
+# 
+#     # Read in 'PubMed' file and extract relevant information.
+#     dbPM.content = pubmedFormat('input-files/pubmed2017.txt', dbPM.idNummer)
+#     print 'Finished reading in PubMed'
+# 
+#     # Read in 'Scopus' file and extract relevant information.
+#     dbScopus.content = risFormat('input-files/scopus2017.ris',
+#                                  dbScopus.idNummer)
+#     print 'Finished reading in Scopus'
+# 
+#     # Read in 'Inpsec' file and extract relevant information.
+#     contentInspec = []
+#     with open('input-files/inspec2017.txt') as f:
+#         ic = 0
+#         for line in f:
+#             fields = line.split('\t')
+#             if ic > 0:
+#                 contentInspec.append(Document(fields[6], fields[5], fields[51],
+#                                     fields[12], fields[50], None, fields[41],
+#                                     fields[13], fields[35],
+#                                     inspecCorrAuth(fields[6], fields[35]),
+#                                     None, None, None, dbInspec.idNummer))
+#             else:
+#                 ic += 1
+#     dbInspec.content = contentInspec
+#     print 'Finished reading in Inspec'
+# 
+#     # Read in 'TEMA' file and extract relevant information.
+#     dbTEMA.content = risFormat('input-files/tema2017.ris', dbTEMA.idNummer)
+#     print 'Finished reading in TEMA'
+# 
+#     # Read in 'ProQuest' file and extract relevant information.
+#     dbPQ.content = risFormat('input-files/pq2017.ris', dbPQ.idNummer)
+#     print 'Finished reading in ProQuest'
+# 
+#     # Read in 'Business Source Complete' file and extract relevant information.
+#     dbBSC.content = risFormat('input-files/bsc2017.ris', dbBSC.idNummer)
+#     print 'Finished reading in Business Source Complete'
+# 
+#     # Read in 'GeoRef' file and extract relevant information.
+#     dbGf.content = risFormat('input-files/gf2017.ris', dbGf.idNummer)
+#     print 'Finished reading in GeoRef'
+# 
+#     # Read in 'CINAHL' file and extract relevant information.
+#     dbCIN.content = risFormat('input-files/cinahl2017.ris', dbCIN.idNummer)
+#     print 'Finished reading in CINAHL'
+# 
+#     # Read in 'LISA' file and extract relevant information.
+#     dbLisa.content = risFormat('input-files/lisa2017.ris', dbLisa.idNummer)
+#     print 'Finished reading in LISA'
+# 
+#     # Read in 'CAB Abstracts' file and extract relevant information.
+#     dbCAB.content = risFormat('input-files/cab2017.ris', dbCAB.idNummer)
+#     print 'Finished reading in CAB Abstracts'
+# 
+#     # Read in 'Embase' file and extract relevant information.
+#     dbEm.content = risFormat('input-files/embase2017.ris', dbEm.idNummer)
+#     print 'Finished reading in Embase'
+# 
+#     # Read in 'SportDiscus' file and extract relevant information.
+#     dbSD.content = risFormat('input-files/sd2017.ris', dbSD.idNummer)
+#     print 'Finished reading in Sport Discus'
+# 
+#     # Read in 'IEEE' file and extract relevant information.
+#     dbIEEE.content = risFormat('input-files/IEEE2017.ris', dbIEEE.idNummer)
+#     print 'Finished reading in IEEE'
 
     # Read in 'EBSCO' file and extract relevant information.
-    dbEB.content = risFormat('input-files/ebsco2017.ris', dbEB.idNummer)
+#     dbEB.content = risFormat('input-files/ebsco2018_gesamt.ris', dbEB.idNummer)
+#     dbEB.content = risFormatNew('input-files/ebsco2018_ahl.ris', dbEB.idNummer)
+    dbEB.content = risFormatNew('input-files/ebsco2018_gesamt.ris', dbEB.idNummer)
     print 'Finished reading in EBSCO'
 
 # do not set up a new database below this line!
