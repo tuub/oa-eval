@@ -1202,11 +1202,11 @@ if doReadIn:
             
             allPubs_temp += db.content
             
-            ch = 'authors\ttitle\tOA-Status\tDOI\tjournal\tISSN\teISSN\tpublisher\tyear\t\
-            affiliations\tall identified name variants\tcorresponding author\t\
-            found name variant\te-mail\tsubject\tDOAJ subject\tfunding\tlicence\t\
-            databaseID\tnotes\toaDOI[is_oa]\toaDOI[journal_is_oa]\toaDOI[host_type]\t\
-            oaDOI[license]\tAPC Amount\tAPC Currency'
+            ch = 'authors\ttitle\tOA-Status\tDOI\tjournal\tISSN\teISSN\tpublisher\tyear\t' + \
+            'affiliations\tall identified name variants\tcorresponding author\t'           + \
+            'found name variant\te-mail\tsubject\tDOAJ subject\tfunding\tlicence\t'        + \
+            'databaseID\tnotes\toaDOI[is_oa]\toaDOI[journal_is_oa]\toaDOI[host_type]\t'    + \
+            'oaDOI[license]\tAPC Amount\tAPC Currency'
             
             filename = output_dir + '/' + db.name.replace(' ', '_') + '.txt'
             
