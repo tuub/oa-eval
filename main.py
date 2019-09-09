@@ -19,8 +19,6 @@ import urllib2
 import json
 import os
 import re
-from _ast import Or
-import xxsubtype
 
 # ----------------- 1. Enable/Disable Functionalities -------------------------
 
