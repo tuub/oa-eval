@@ -477,9 +477,11 @@ def get_first_author_and_first_affiliation_as_string(newDoc):
     return '; '.join(result_list)
 
 
+
 # Read in RIS-files
 # INPUT: RIS-records, database-ID
 # OUTPUT: List of documents
+
 def risFormat(risRecords, ind):
     records = []
 
@@ -901,7 +903,7 @@ dbInspec = Database('Inspec', 5)
 dbTEMA = Database('TEMA', 4)
 dbPQ = Database('ProQuest', 7)
 dbBSC = Database('Business Source Complete', 9)
-# dbGf = Database('GeoRef', 10)
+dbGf = Database('GeoRef', 10)
 dbCIN = Database('CINAHL', 12)
 dbLisa = Database('LISA', 15)
 dbCAB = Database('CAB Abstracts', 11)
@@ -1032,10 +1034,10 @@ if doReadIn:
     dbBSC.content = risFormat('input-files/bsc2018.ris', dbBSC.idNummer)
     print 'Finished reading in Business Source Complete'
  
-#     # Read in 'GeoRef' file and extract relevant information.
-#     dbGf.content = risFormat('input-files/gf2018.ris', dbGf.idNummer)
-#     print 'Finished reading in GeoRef'
-# 
+    # Read in 'GeoRef' file and extract relevant information.
+    dbGf.content = risFormat('input-files/gf2018.ris', dbGf.idNummer)
+    print 'Finished reading in GeoRef'
+ 
     # Read in 'CINAHL' file and extract relevant information.
     dbCIN.content = risFormat('input-files/cinahl2018.ris', dbCIN.idNummer)
     print 'Finished reading in CINAHL'
@@ -1163,7 +1165,7 @@ for item in finalList:
     if len(item.authors) > 2500:
         item.authors = item.authors[0:2500] + \
         '... [List shortened due to excessive length]'
-    if len(item.affiliations) > 2500:
+    if item.affiliations and len(item.affiliations) > 2500:
         item.affiliations = item.affiliations[0:2500] + \
         '... [List shortened due to excessive length]'
 
