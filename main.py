@@ -1209,7 +1209,18 @@ for item in finalList:
 # Add information about the subject, publisher and journal licence
 doaj = np.loadtxt('input-files/doaj.txt', dtype='string', comments='$#',
                   skiprows=1, delimiter='\t',
-                  usecols=(3, 4, 0, 56, 11, 12, 5, 44, 29))
+                  usecols=(
+                      3,    # Journal ISSN (print version)
+                      4,    # Journal EISSN (online version)
+                      0,    # Journal title
+                      54,   # Subjects
+                      11,   # APC amount
+                      12,   # Currency
+                      5,    # Publisher
+                      42,   # Journal license
+                      27    # First calendar year journal provided online Open Access content
+                  )
+                 )
 print 'Finished reading in DOAJ data'
 issns = collections.Counter(doaj[:, 0])
 eissns = collections.Counter(doaj[:, 1])
