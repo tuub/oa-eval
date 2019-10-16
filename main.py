@@ -67,7 +67,7 @@ yearMin = 2018
 yearMax = 2018
 
 # Enter your email here. It's needed to contact Unpaywall
-myEMail = 'oabb@open-access-berlin.de'
+myEMail = 'test@example.com'
 
 
 # ----------------- 2. Setting up Classes and Functions -----------------------
