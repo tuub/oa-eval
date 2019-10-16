@@ -295,6 +295,8 @@ def askOaDOI(needInfo):
             fehler = "Sorry, Unpaywall doesn't know this DOI (HTTP Error)."
             print 'DOI ', doi, ': ', fehler
             errDOIs += [doi]
+        except:
+            print 'DOI ', doi + ': ++++++++ other error!! ++++++++ ';
         i += 1
         if i % 500 == 0:
             print 'Now received responses for ', i, ' documents from Unpaywall'
