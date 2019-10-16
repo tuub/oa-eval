@@ -829,21 +829,43 @@ Cnames = [['Charit', 'Univ'],
           ['Medical', 'School', 'Berlin']]
 Charite = Inst('Charité', Cnames)
 
+# TODO: Univ Med Berlin = Charité?
+
 # FU
 FUnames = [['Berlin', 'FU'], ['Berlin', 'Free Univ'],
            ['Berlin', 'Freie', 'Univ'], ['Univ', 'Libre', 'Berlin']]
 FU = Inst('FU', FUnames)
+
+# TODO: not recognized
+# 
+# Frei Univ Berlin
+# Frei Universität Berlin
+# Frei Universitaet Berlin
+
 
 # HU
 HUnames = [['Berlin', 'HU'],
            ['Berlin', 'Humboldt', 'Univ']]
 HU = Inst('HU', HUnames)
 
+# TODO: not recognized
+# 
+# Humboldt University
+# Humboldt-Universität
+# Humboldt University
+# Humbolt Univ Berlin
+
+
 # UdK
 UdKnames = [['Univ', 'Arts', 'Berlin'],
             ['Univ', 'Kunst', 'Berlin'],
             ['Berlin', 'UdK']]
 UdK = Inst('UdK', UdKnames)
+
+# TODO: not recognized
+# 
+# Universität der Künste, Berlin
+# Universität der Künste Berlin
 
 # Beuth
 Bnames = [['Beuth', 'Berlin']]
@@ -859,6 +881,10 @@ HWRnames = [['HWR', 'Berlin'],
             ['Wirt', 'Recht', 'Berlin'],
             ['Berlin', 'Economics', 'Law', 'School']]
 HWR = Inst('HWR', HWRnames)
+# TO DO: not recognized
+# Berlin Sch Econ & Law, Berlin
+
+
 
 # Alice Salomon
 ASHnames = [['Alice', 'Salomon', 'Berlin'], ['ASH', 'Berlin'],
@@ -889,6 +915,23 @@ TU.nameVar1 = [['Technische Universitat Berlin'],
                 ['Technische Universitaet de Berlin'],
                 ['Technical University of Berlin'],
                 ['Berlin University of Technology']]
+
+# TODO: not recognized
+#
+# Tech Univ, Fachgebiet Bauinformat, Berlin, Germany
+# Technol Univ Berlin
+# Tech Univ, Berlin
+# Berlin Tech Univ
+# TU, Berlin
+# Technical University (TU) Berlin
+# Technischen Universität Berlin
+# Technische Universität, Berlin
+# Berlin, TU
+# Technical University, Berlin
+# Tech. Univ., Berlin
+# Technical University in Berlin
+
+
 
 
 # ------------- 4. Read in Text Files and Extract Information -----------------
@@ -1174,6 +1217,8 @@ for item in finalList:
 # Make some adjustments to EBSCO data. These are due to several metadata-
 # schemes being present in the data. This approach is suboptimal and shoud
 # be cleaned up and rewritten
+
+# TO DO: Serious Bug, sometimes a char gets cut off the end of the corrAuth field where it should not
 for item in finalList:
     if item.dbID == 13 and item.corrAuth is not None:
         if item.corrAuth[0:2] == '; ':
