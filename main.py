@@ -17,6 +17,8 @@ import weakref
 from prettytable import PrettyTable
 import urllib2
 import json
+import os
+import re
 
 # ----------------- 1. Enable/Disable Functionalities -------------------------
 
@@ -61,8 +63,8 @@ contactOaDOI = 1
 checkToDo = 1
 
 # Clarify which years of publication are of interest to you
-yearMin = 2016
-yearMax = 2016
+yearMin = 2018
+yearMax = 2018
 
 # Enter your email here. It's needed to contact Unpaywall
 myEMail = 'test@example.com'
@@ -261,6 +263,10 @@ def askOaDOI(needInfo):
             for item in relKeys:
                 if relKeys[item] in response:
                     replies[i][item] = response[relKeys[item]]
+                
+                # if the key cannot be found in the response (on the top level) 
+                # but there is an entry 'best_oa_location' that has an entry for
+                # that key then take that value.  
                 elif 'best_oa_location' in response:
                     subresponse = response['best_oa_location']
                     if subresponse is not None:
@@ -289,6 +295,8 @@ def askOaDOI(needInfo):
             fehler = "Sorry, Unpaywall doesn't know this DOI (HTTP Error)."
             print 'DOI ', doi, ': ', fehler
             errDOIs += [doi]
+        except:
+            print 'DOI ', doi + ': ++++++++ other error!! ++++++++ ';
         i += 1
         if i % 500 == 0:
             print 'Now received responses for ', i, ' documents from Unpaywall'
@@ -438,191 +446,312 @@ risFields = np.genfromtxt('RIS-fields.csv', delimiter=';', dtype=None)
 # Valid characters for ISSNs
 numX = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'X']
 
+def concatenate_tags(publication, tag_list):
+    # just concatenate the strings belonging to the tags in the tag_list; separate values with '; '  
+    result_list = []
+    for tag in tag_list:
+        if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+            result_list.extend(publication[tag])
+
+    if result_list:
+        return '; '.join(result_list)
+    else:
+        return None
+        
+
+
+def get_first_author_and_first_affiliation_as_string(newDoc):   
+    result_list = []
+    
+    att_authors      = getattr(newDoc, 'authors')
+    att_affiliations = getattr(newDoc, 'affiliations')
+    
+    if att_authors:
+        # if more than one author: normally separated by ;
+        first_author = att_authors.split('; ')[0]                    
+        result_list.append(first_author)
+            
+    if att_affiliations:
+        # if more than one affiliation: normally separated by ;
+        first_affiliation = att_affiliations.split('; ')[0]
+        result_list.append(first_affiliation)
+
+    return '; '.join(result_list)
+
+
+
 # Read in RIS-files
 # INPUT: RIS-records, database-ID
 # OUTPUT: List of documents
+
 def risFormat(risRecords, ind):
     records = []
-    newDoc = None
-    relMap = risFields[:, np.where(risFields[0, :] == str(ind))]
+
+    # 
+    # read file, put data in data structure
+    #
+    publication_data = []
     with open(risRecords, 'rU') as f:
         for line in f:
-            twoL = line[0:2]
-            textL = line[6:-1]
-            if ind == 12:
-                newDocInd = 'ID'
-            else:
-                newDocInd = 'TY'
-            if twoL == newDocInd:
-                if newDoc is not None:
-                    records.append(newDoc)
-                newDoc = Document('', '', None, None, None, None, None, None,
-                                  '', None, None, None, None, ind)
-            if twoL.isupper() and line[2] == ' ':
-                if twoL in relMap:
-                    ab = str(risFields[np.where(relMap == twoL)[0], 0][0])
-                    if getattr(newDoc, ab) in ('', None):
+            if line.strip(): # ignore empty lines
+                tag  = line[0:2]
+                data = line[6:-1].strip()
+                
+                # ignore lines that do not match the pattern "XX  - data" 
+                if not (tag.isupper() and line[2] == ' '):
+                    continue
+                
+                # ignore line with Tag 'TY' for database CINAHL
+                if ind == 12 and tag == 'TY':
+                    continue
+                
+                
+                # Start of a new record?
+                if (ind != 12 and tag == 'TY') or (ind == 12 and tag == 'ID'):
+                     publication_data.append({})
 
-                        # Authors
-                        if ab == 'authors' and ind in [4, 7, 9, 10, 11, 12, 17]:
-                            setattr(newDoc, ab, textL)
-                            setattr(newDoc, 'corrAuth', textL)
+                # enter line in data list
+                # is there an entry for that tag?
+                if not tag in publication_data[-1]:
+                    publication_data[-1][tag] = []
+                    
+                publication_data[-1][tag].append(data)
 
-                        # DOIs
-                        elif ab == 'DOI':
-                            if '10.' in textL and 'y.com/' not in textL:
-                                if 'doi.org' in textL:
-                                    s1 = textL.find('.org')
-                                    textL = textL[s1 + 5:]
-                                if ' ' in textL:
-                                    textL = textL[:textL.find(' ')]
-                                setattr(newDoc, ab, textL.strip('doi:'))
+    #
+    # Auswertung
+    #
 
-                        # ISSNs
-                        elif ab == 'ISSN':
-                            if textL[0:4] != '978-':
-                                anInt = filter(lambda x: x in numX, textL)
-                                if anInt != '':
-                                    setattr(newDoc, ab,
-                                            anInt[0:4] + '-' + anInt[4:8])
-                                if len(anInt) > 8:
-                                    setattr(newDoc, 'eISSN',
-                                            anInt[8:12] + '-' + anInt[12:16])
-
-                        # Year
-                        elif ab == 'year' and len(textL) > 4:
-                            setattr(newDoc, ab, int(line[6:10]))
-
-                        # affiliations
-                        elif ab == 'affiliations' and ind in [4, 10, 11, 12]:
-                            setattr(newDoc, ab, textL)
-                            setattr(newDoc, 'corrAuth',
-                                    getattr(newDoc, 'corrAuth') + "; " + textL)
-                        elif ab == 'affiliations' and ind in [7]:
-                            setattr(newDoc, ab, textL)
-                            t1 = getattr(newDoc, 'affiliations')
-                            p1 = t1.find('; ')
-                            if p1 < 0:
-                                p1 = len(t1)
-                            t1 = t1[:p1]
-                            setattr(newDoc, 'corrAuth',
-                                    getattr(newDoc, 'corrAuth') + "; " + t1)
-                        # BSC, EBSCO, SportDiscus
-                        elif ab == 'affiliations' and ind in [9, 13, 17]:
-                            q1 = -1
-                            if ind == 17:
-                                if 'Affiliation' in textL:
-                                    q1 = textL.find('Affiliation') + 15
-                            else:
-                                if 'Affiliation' in textL:
-                                    q1 = textL.find('Affiliation') + 17
-                            if q1 > 0:
-                                if textL[q1-1] != ' ' and textL[q1] != ' ':
-                                    while textL[q1-1] != ' ':
-                                        q1 -= 1
-                                beTe = getattr(newDoc, 'corrAuth')
-                                if beTe is None:
-                                    beTe = ''
-                                # BSC
-                                if ind == 9:
-                                    q2 = textL.find('Issue Info:') - 2
-                                    q3 = textL[q1:q2+2].find('; ')
-                                    qd = q1 + q3
-                                    setattr(newDoc, 'corrAuth',
-                                            beTe + "; " + textL[q1:qd])
-                                # EBSCO
-                                elif ind == 13:
-                                    q2 = textL.find('Source Info:') - 2
-                                    if q2 < 0:
-                                        q2 = textL.find('Issue Info:') - 2
-                                    if q2 < 0:
-                                        q2 = textL.find('Document Type:') - 2
-                                    if q2 < 0:
-                                        q2 = textL.find('Release Date:') - 2
-                                    q3 = textL[q1:].find(' 2:')
-                                    if q3 < 0:
-                                        q3 = textL[q1:].find(' 2 :')
-                                    if q3 > 0:
-                                        qd = q1 + q3
-                                    else:
-                                        qd = q2
-                                    if getattr(newDoc, 'corrAuth') is None:
-                                        setattr(newDoc, 'corrAuth', '')
-                                    setattr(newDoc, 'corrAuth',
-                                            beTe + "; " + textL[q1:qd])
-                                # SportDiscus
-                                elif ind == 17:
-                                    q2 = textL.find('No. of Pages:') - 2
-                                    q3 = textL[q1:].find(': 2 ')
-                                    if q3 > 0:
-                                        qd = q1 + q3
-                                    else:
-                                        qd = q2
-                                    setattr(newDoc, 'corrAuth',
-                                            beTe + "; " + textL[q1:qd])
-                                setattr(newDoc, ab, textL[q1:q2])
-                            # Find E-Mail-Adresses
-                            if ind == 17:
-                                p1 = textL.find('email:')
-                            else:
-                                p1 = textL.find('Email Address:')
-                            if p1 > 0:
-                                if ind == 17:
-                                    p1 += 7
-                                else:
-                                    p1 += 15
-                                if ind == 9:
-                                    p2 = textL[p1:-1].find(';')
-                                elif ind == 13:
-                                    p2 = textL[p1:-1].find(' ')
-                                elif ind == 17:
-                                    p2 = textL[p1:-1].find('. ')
-                                setattr(newDoc, 'eMail', textL[p1:p1 + p2].strip(';'))
-
-                        # Corresponding Authors
-                        elif ab == 'corrAuth' and ind == 14:
-                            setattr(newDoc, ab, textL)
-                            p1 = textL.find('E-mail:')
-                            if p1 > 0:
-                                p1 += 8
-                                setattr(newDoc, 'eMail', textL[p1:].strip(';'))
-                        elif ab == 'corrAuth' and ind == 16:
-                            if 'Correspondence Address' in textL:
-                                o1 = textL.find('Correspondence Address') + 24
-                                setattr(newDoc, ab, textL[o1:])
-                            if 'email' in textL:
-                                o2 = textL.find('email:') + 7
-                                setattr(newDoc, 'eMail', textL[o2:])
-                        else:
-                            setattr(newDoc, ab, textL)
-                    # If something is already written in this attribute
-                    elif getattr(newDoc, ab) not in ('', None) \
-                                             and ab != 'ISSN' and ab != 'DOI':
-                        if (ab != 'corrAuth' or ind != 16) and \
-                           (ab != 'corrAuth' or ind != 13):
-                            setattr(newDoc, ab,
-                                    getattr(newDoc, ab) + "; " + textL)
-                    elif getattr(newDoc, ab) not in ('', None) \
-                                             and ab == 'ISSN' and ab != 'DOI':
-                        if textL[0:4] != '978-':
-                            if ind == 13:
-                                setattr(newDoc, ab, textL)
-                            else:
-                                anInt = filter(lambda x: x in numX, textL)
-                                if anInt != '':
-                                    setattr(newDoc, 'eISSN',
-                                            anInt[0:4] + '-' + anInt[4:8])
-                # Scopus: If no corresponding author was provided, use first
-                # author instead
-                if twoL == 'UR' and ind == 16:
-                    if newDoc.corrAuth is None:
-                        authorList = newDoc.authors.split('; ')
-                        affilList = newDoc.affiliations.split('; ')
-                        setattr(newDoc, 'corrAuth',
-                                authorList[0] + '; ' + affilList[0])
+    # get col from file RIS-fields.csv
+    ris_tags = {}
+    
+    for col_nr_db in range(len(risFields[0])):
+        if str(ind) == risFields[0][col_nr_db]:
+            break
+    
+    # get RIS-Tags for fields
+    for line_nr in range(1, len(risFields)):
+        attribute = risFields[line_nr][0]
+        if not attribute in ris_tags:
+            ris_tags[attribute] = []
+        
+        if risFields[line_nr][col_nr_db]: # falls Feld nicht leer
+            ris_tags[attribute].append(risFields[line_nr][col_nr_db])
+    
+    
+    #
+    # extract data for each publication
+    #
+    for publication in publication_data:
+        newDoc = Document('', '', None, None, None, None, None, None, '', None, None, None, None, ind)
         records.append(newDoc)
-    return records
 
+
+        # take fields as is; concatenate with ; if several tags 
+        for attribute in ['authors', 'title', 'journal', 'publisher']:
+            result_string = concatenate_tags(publication, ris_tags[attribute])
+            if attribute == 'title' and result_string:
+                result_string = result_string.strip('.')
+                
+            setattr(newDoc, attribute, result_string)
+
+        result_string = None
+
+        
+        
+        # affiliations
+        attribute = 'affiliations'
+        
+        if ind in [9, 13, 17]:  # BSC, EBSCO, SportDiscus
+            # nehme Affiliatin aus 'AD', wenn vorhanden, sonst 'N1'
+            for tag in ris_tags[attribute]:
+                if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                    # Affiliationen stehen häufig im Notiz-feld N1; ist aber Fallback, nehme N1 nur, 
+                    # wenn es kein anderes Feld gibt!
+                    if tag != 'N1':
+                        attribute_string = '; '.join(publication[tag])
+                        setattr(newDoc, attribute, attribute_string)
+                        break # danach keine weiteren Tags mehr auswerten!
+                    elif tag == 'N1':
+                        attribute_string = '; '.join(publication[tag])
+                        # Affiliationen stehen im Notizfeld zusammen mit anderen Angaben
+                        # wird mit "Affiliations: " eingeleitet
+                        # angaben danach eingeleitet mit : 'Source Info:', 'Issue Info:', 'Document Type:' oder 'Release Date:'
+                        m = re.search('Affiliations?: +(.+?) +(Source Info:|Issue Info:|Document Type:|Release Date:|No. of Pages:)', attribute_string)
+                        if m:
+                            substring = m.group(1)
+                            
+                            if ind in [17]:  # SportDiscus
+                                # split into affiliations; each is marked by : 1 ,: 2 , etc, 
+                                affiliations_list = re.split(": [0-9]+ ", ': ' + substring)
+                            
+                            else:
+                                # split into affiliations; each is marked by 1: , 2: , etc, 
+                                # important: there must be whitespace ahead of the number; otherwise the match might be incorrect
+                                affiliations_list = re.split("\s[0-9]+\s*:\s*", ' ' + substring)
+                            
+                            new_affiliations_string = ''
+                            for aff in affiliations_list:
+                                if aff.strip(): # ignore empty entries
+                                    aff = aff.strip(' ;') # strip ; from end
+                                    if new_affiliations_string: 
+                                        new_affiliations_string += '; '
+                                    new_affiliations_string += aff
+                            
+                            setattr(newDoc, attribute, new_affiliations_string)
+            
+        else:
+            setattr(newDoc, attribute, concatenate_tags(publication, ris_tags[attribute]))
+                
+            
+        # DOI
+        attribute = 'DOI'
+        result_string = ''
+        if ind in [13]:
+            for tag in ris_tags[attribute]:
+                if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                    if tag != 'N1':
+                        for attribute_string in publication[tag]:
+                            if 'doi.org' in attribute_string or attribute_string.startswith('10.'):
+                                result_string = attribute_string
+                                break # nehme nur die erste DOI
+                        if result_string: # falls Ergebnis, ddanach keine weiteren Tags mehr auswerten!
+                            break 
+                            
+                    else: # N1
+                        attribute_string = '; '.join(publication[tag])
+                        m = re.search('DOI: +([^\s]+)', attribute_string)
+                        if m:
+                            result_string = m.group(1).strip(' .')
+            
+            if result_string.strip():
+                result_string = result_string.strip()
+                if 'doi.org' in result_string:
+                    result_string = result_string[result_string.find('doi.org') + 8:]
+                
+                setattr(newDoc, attribute, result_string)
+            
+            
+        else:
+            result_string = concatenate_tags(publication, ris_tags[attribute])
+
+            if result_string and 'doi.org' in result_string:
+                result_string = result_string[result_string.find('doi.org') + 8:]
+            
+            setattr(newDoc, attribute, result_string)
+
+        result_string = None
+        
+        
+        # ISSN, eISSN
+        attribute = 'ISSN'
+        for tag in ris_tags[attribute]:
+            if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                for attribute_string in publication[tag]: # falls es mehrere Tags gibt        
+                    
+                    if attribute_string[0:4] != '978-': 
+                        anInt = filter(lambda x: x in numX, attribute_string)
+
+                        if anInt != '':
+                            # das erste Tag
+                            if getattr(newDoc, attribute) in ('', None):
+                                setattr(newDoc, attribute, anInt[0:4] + '-' + anInt[4:8])
+                                if len(anInt) > 8:
+                                    setattr(newDoc, 'eISSN', anInt[8:12] + '-' + anInt[12:16])
+                                
+                            # zweites Tag = Elektronisch
+                            else:
+                                setattr(newDoc, 'eISSN', anInt[0:4] + '-' + anInt[4:8])
+                    
+        
+        # year
+        attribute = 'year'
+        for tag in ris_tags[attribute]:
+            if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                attribute_string = publication[tag][0] # nehme das erste Tag, ignoriere weitere 
+                if len(attribute_string) > 4:
+                    result = int(attribute_string[:4]) # beginnt mit der Jahreszahl 
+                else:
+                    result = int(attribute_string)
+                    
+                setattr(newDoc, attribute, result)
+        
+
+        # corrAuth
+        attribute = 'corrAuth'
+
+        if ris_tags[attribute]:   # if defined in RIS-fields.csv
+            
+            if ind in [16]: # Scopus
+                result_list = []
+                
+                for tag in ris_tags[attribute]:
+                    if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                        for attribute_string in publication[tag]:
+                            m = re.search('Correspondence Address: (.+)$', attribute_string)
+                            if m:
+                                result_list.append(m.group(1))
+
+                if result_list:
+                    result_string = '; '.join(result_list)
+                    
+                else:   # nothing found in tags
+                    result_string = get_first_author_and_first_affiliation_as_string(newDoc)
+                
+                setattr(newDoc, attribute, result_string)
+                
+                result_string = None
+                result_list   = None
+            
+            else:          
+                setattr(newDoc, attribute, concatenate_tags(publication, ris_tags[attribute]))
+        
+        else:
+            # take first author + first affiliation
+            # but only if the database has information about affiliations (otherwise useless)
+            if getattr(newDoc, 'affiliations'):
+                setattr(newDoc, attribute, get_first_author_and_first_affiliation_as_string(newDoc))
+        
+        
+        # eMail
+        attribute = 'eMail'
+        
+        if ind in [9, 13, 17]:   # BSC, EBSCO, SportDiscus
+            # Mail address in notes N1 
+            result_string = ''
+            attribute_string_list = []
+            for tag in ris_tags['affiliations']:
+                if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                    # Affiliationen stehen häfig im Notiz-feld N1; ist aber Fallback, nehme N1 nur, wenn es kein anderes Feld gibt!
+                    attribute_string_list.extend(publication[tag])
+                    if tag != 'N1':
+                        break # danach keine weiteren Tags mehr auswerten!
+
+            m = re.search('(Email Address|email): ([^\s;]+)', '; '.join(attribute_string_list))
+            if m:
+                result_string = m.group(2).strip(' ,;.')
+
+            if result_string:
+                setattr(newDoc, attribute, result_string)
+                
+            result_string = None
+            
+        elif ind in [14, 16]: # Embase, Scopus
+            result_list = []
+            
+            for tag in ris_tags['corrAuth']:  # part of the field that contains the corresponding author
+                if tag in publication:          # wenn Tag in Publications-Daten vorhanden
+                    for attribute_string in publication[tag]:
+                        m = re.search('(E-mail|email): (.+)$', attribute_string)
+                        if m:
+                            result_list.append(m.group(2))
+
+            if result_list:
+                setattr(newDoc, attribute, '; '.join(result_list))
+                
+            result_list = None
+        
+    return records
+    
 # List of consonants
 co = ('b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r',
           's', 't', 'v', 'w', 'x', 'y', 'z', 'B', 'C', 'D', 'F', 'G', 'H', 'J',
@@ -690,24 +819,53 @@ TU = Inst('TU', TUnames)
 Cnames = [['Charit', 'Univ'],
           ['Campus', 'Virchow', 'Berlin'],
           ['Campus', 'Franklin', 'Berlin'],
-          ['Charit', 'Berlin']]
+          ['Campus', 'Buch', 'Berlin'],
+          ['Campus', 'Mitte', 'Berlin'],
+          ['Charit', 'Berlin'],
+          ['Berlin', 'Inst', 'Health'],
+          ['Berlin', 'Inst', 'Gesundheitsforschung'],
+          ['medizin', 'Berlin'],
+          ['Medical', 'Univ', 'Berlin'],
+          ['Medical', 'School', 'Berlin']]
 Charite = Inst('Charité', Cnames)
+
+# TODO: Univ Med Berlin = Charité?
 
 # FU
 FUnames = [['Berlin', 'FU'], ['Berlin', 'Free Univ'],
            ['Berlin', 'Freie', 'Univ'], ['Univ', 'Libre', 'Berlin']]
 FU = Inst('FU', FUnames)
 
+# TODO: not recognized
+# 
+# Frei Univ Berlin
+# Frei Universität Berlin
+# Frei Universitaet Berlin
+
+
 # HU
 HUnames = [['Berlin', 'HU'],
            ['Berlin', 'Humboldt', 'Univ']]
 HU = Inst('HU', HUnames)
+
+# TODO: not recognized
+# 
+# Humboldt University
+# Humboldt-Universität
+# Humboldt University
+# Humbolt Univ Berlin
+
 
 # UdK
 UdKnames = [['Univ', 'Arts', 'Berlin'],
             ['Univ', 'Kunst', 'Berlin'],
             ['Berlin', 'UdK']]
 UdK = Inst('UdK', UdKnames)
+
+# TODO: not recognized
+# 
+# Universität der Künste, Berlin
+# Universität der Künste Berlin
 
 # Beuth
 Bnames = [['Beuth', 'Berlin']]
@@ -723,6 +881,10 @@ HWRnames = [['HWR', 'Berlin'],
             ['Wirt', 'Recht', 'Berlin'],
             ['Berlin', 'Economics', 'Law', 'School']]
 HWR = Inst('HWR', HWRnames)
+# TO DO: not recognized
+# Berlin Sch Econ & Law, Berlin
+
+
 
 # Alice Salomon
 ASHnames = [['Alice', 'Salomon', 'Berlin'], ['ASH', 'Berlin'],
@@ -753,6 +915,23 @@ TU.nameVar1 = [['Technische Universitat Berlin'],
                 ['Technische Universitaet de Berlin'],
                 ['Technical University of Berlin'],
                 ['Berlin University of Technology']]
+
+# TODO: not recognized
+#
+# Tech Univ, Fachgebiet Bauinformat, Berlin, Germany
+# Technol Univ Berlin
+# Tech Univ, Berlin
+# Berlin Tech Univ
+# TU, Berlin
+# Technical University (TU) Berlin
+# Technischen Universität Berlin
+# Technische Universität, Berlin
+# Berlin, TU
+# Technical University, Berlin
+# Tech. Univ., Berlin
+# Technical University in Berlin
+
+
 
 
 # ------------- 4. Read in Text Files and Extract Information -----------------
@@ -789,36 +968,59 @@ dbNameID = {datenbanken[i].idNummer: datenbanken[i].name for i in range(leDat)}
 if doReadIn:
     # Read in the 'Web of Science' file and extract the relevant information.
     contentWoS = []
-    with open('input-files/wos2016.txt') as f:
+    with open('input-files/wos2018.txt') as f:
         ic = 0
         for line in f:
             fields = line.split('\t')
             if ic > 0:
-                contentWoS.append(Document(fields[1], fields[8], fields[54],
-                                 fields[9], fields[38], fields[39], fields[35],
-                                 fields[44], fields[22], fields[23],
-                                 fields[24], fields[59], fields[27],
-                                 dbWoS.idNummer))
+                contentWoS.append(
+                    Document(
+                        fields[1],     # authors
+                        fields[8],     # title
+                        fields[54],    # DOI
+                        fields[9],     # journal
+                        fields[38],    # ISSN
+                        fields[39],    # eISSN
+                        fields[35],    # publisher
+                        fields[44],    # year
+                        fields[22],    # affiliations
+                        fields[23],    # corrAuth
+                        fields[24],    # eMail
+                        fields[59],    # subject
+                        fields[27],    # funding
+                        dbWoS.idNummer
+                    )
+                )
             else:
                 ic += 1
     dbWoS.content = contentWoS
     print 'Finished reading in Web of Science'
-
+ 
     # Read in the 'SciFinder' files and extract the relevant information.
     contentSF = []
-    with open('input-files/sf2016.txt', 'rU') as f:
+    with open('input-files/sf2018.txt', 'rU') as f:
         ic = 0
         for line in f:
             fields = line.split('\t')
             if ic > 0:
-                contentSF.append(Document(fields[6].strip('"'),
-                                fields[3].strip('"'),
-                                fields[49].strip('\n').strip('\r').strip('"'),
-                                fields[17].strip('"'), fields[15].strip('"'),
-                                None, None, fields[22].strip('"'),
-                                fields[11].strip('"'), fields[11].strip('"'),
-                                None, fields[9].strip('"'), None,
-                                dbSF.idNummer))
+                contentSF.append(
+                    Document(
+                        fields[6].strip('"'),                          # authors      
+                        fields[3].strip('"'),                          # title        
+                        fields[49].strip('\n').strip('\r').strip('"'), # DOI          
+                        fields[17].strip('"'),                         # journal      
+                        fields[15].strip('"'),                         # ISSN         
+                        None,                                          # eISSN        
+                        None,                                          # publisher    
+                        fields[22].strip('"'),                         # year         
+                        fields[11].strip('"'),                         # affiliations 
+                        fields[11].strip('"'),                         # corrAuth     
+                        None,                                          # eMail        
+                        fields[9].strip('"'),                          # subject      
+                        None,                                          # funding      
+                        dbSF.idNummer
+                    )
+                )
             else:
                 ic += 1
     dbSF.content = contentSF
@@ -826,75 +1028,87 @@ if doReadIn:
         firstAuthor = item.authors.split('; ')[0]
         item.corrAuth = firstAuthor + '; ' + item.corrAuth
     print 'Finished reading in SciFinder'
-
+ 
     # Read in 'PubMed' file and extract relevant information.
-    dbPM.content = pubmedFormat('input-files/pubmed2016.txt', dbPM.idNummer)
+    dbPM.content = pubmedFormat('input-files/pubmed2018.txt', dbPM.idNummer)
     print 'Finished reading in PubMed'
-
+ 
     # Read in 'Scopus' file and extract relevant information.
-    dbScopus.content = risFormat('input-files/scopus2016.ris',
-                                 dbScopus.idNummer)
+    dbScopus.content = risFormat('input-files/scopus2018.ris', dbScopus.idNummer)
     print 'Finished reading in Scopus'
-
+ 
     # Read in 'Inpsec' file and extract relevant information.
     contentInspec = []
-    with open('input-files/inspec2016.txt') as f:
+    with open('input-files/inspec2018.txt') as f:
         ic = 0
         for line in f:
             fields = line.split('\t')
             if ic > 0:
-                contentInspec.append(Document(fields[6], fields[5], fields[51],
-                                    fields[12], fields[50], None, fields[41],
-                                    fields[13], fields[35],
-                                    inspecCorrAuth(fields[6], fields[35]),
-                                    None, None, None, dbInspec.idNummer))
+                contentInspec.append(
+                    Document(
+                        fields[6],                             # authors      
+                        fields[5],                             # title        
+                        fields[51],                            # DOI          
+                        fields[12],                            # journal      
+                        fields[50],                            # ISSN         
+                        None,                                  # eISSN        
+                        fields[41],                            # publisher    
+                        fields[13],                            # year         
+                        fields[35],                            # affiliations 
+                        inspecCorrAuth(fields[6], fields[35]), # corrAuth     
+                        None,                                  # eMail        
+                        None,                                  # subject      
+                        None,                                  # funding      
+                        dbInspec.idNummer
+                    )
+                )
             else:
                 ic += 1
     dbInspec.content = contentInspec
     print 'Finished reading in Inspec'
-
+ 
     # Read in 'TEMA' file and extract relevant information.
-    dbTEMA.content = risFormat('input-files/tema2016.ris', dbTEMA.idNummer)
+    dbTEMA.content = risFormat('input-files/tema2018.ris', dbTEMA.idNummer)
     print 'Finished reading in TEMA'
-
+ 
     # Read in 'ProQuest' file and extract relevant information.
-    dbPQ.content = risFormat('input-files/pq2016.ris', dbPQ.idNummer)
+    dbPQ.content = risFormat('input-files/pq2018.ris', dbPQ.idNummer)
     print 'Finished reading in ProQuest'
-
+ 
     # Read in 'Business Source Complete' file and extract relevant information.
-    dbBSC.content = risFormat('input-files/bsc2016.ris', dbBSC.idNummer)
+    dbBSC.content = risFormat('input-files/bsc2018.ris', dbBSC.idNummer)
     print 'Finished reading in Business Source Complete'
-
+ 
     # Read in 'GeoRef' file and extract relevant information.
-    dbGf.content = risFormat('input-files/gf2016.ris', dbGf.idNummer)
+    dbGf.content = risFormat('input-files/gf2018.ris', dbGf.idNummer)
     print 'Finished reading in GeoRef'
-
+ 
     # Read in 'CINAHL' file and extract relevant information.
-    dbCIN.content = risFormat('input-files/cinahl2016.ris', dbCIN.idNummer)
+    dbCIN.content = risFormat('input-files/cinahl2018.ris', dbCIN.idNummer)
     print 'Finished reading in CINAHL'
-
+ 
     # Read in 'LISA' file and extract relevant information.
-    dbLisa.content = risFormat('input-files/lisa2016.ris', dbLisa.idNummer)
+    dbLisa.content = risFormat('input-files/lisa2018.ris', dbLisa.idNummer)
     print 'Finished reading in LISA'
-
+ 
     # Read in 'CAB Abstracts' file and extract relevant information.
-    dbCAB.content = risFormat('input-files/cab2016.ris', dbCAB.idNummer)
+    dbCAB.content = risFormat('input-files/cab2018.ris', dbCAB.idNummer)
     print 'Finished reading in CAB Abstracts'
-
+ 
     # Read in 'Embase' file and extract relevant information.
-    dbEm.content = risFormat('input-files/embase2016.ris', dbEm.idNummer)
+    dbEm.content = risFormat('input-files/embase2018.ris', dbEm.idNummer)
     print 'Finished reading in Embase'
-
+ 
     # Read in 'SportDiscus' file and extract relevant information.
-    dbSD.content = risFormat('input-files/sd2016.ris', dbSD.idNummer)
+    dbSD.content = risFormat('input-files/sd2018.ris', dbSD.idNummer)
     print 'Finished reading in Sport Discus'
-
+ 
     # Read in 'IEEE' file and extract relevant information.
-    dbIEEE.content = risFormat('input-files/IEEE2016.ris', dbIEEE.idNummer)
+    dbIEEE.content = risFormat('input-files/ieee2018.ris', dbIEEE.idNummer)
     print 'Finished reading in IEEE'
 
     # Read in 'EBSCO' file and extract relevant information.
-    dbEB.content = risFormat('input-files/ebsco2016-v2.ris', dbEB.idNummer)
+    dbEB.content = risFormat('input-files/ebsco2018.ris', dbEB.idNummer)
     print 'Finished reading in EBSCO'
 
 # do not set up a new database below this line!
@@ -905,7 +1119,48 @@ if doReadIn:
             if article.DOI is not None:
                 article.DOI = article.DOI.lower()
 
+    #
+    # For debugging: Export the data before deduplication 
+    #
+    output_dir = 'normalized-db-files'
+    try:
+        if not os.path.exists(output_dir): os.makedirs(output_dir)
+        
+        allPubs_temp = []
+        
+        for db in datenbanken:
+            '''
+            Save normalized publication data to a tab-seperated file 
+            (one line per publication)
+            '''
+            
+            allPubs_temp += db.content
+            
+            ch = 'authors\ttitle\tOA-Status\tDOI\tjournal\tISSN\teISSN\tpublisher\tyear\t' + \
+            'affiliations\tall identified name variants\tcorresponding author\t'           + \
+            'found name variant\te-mail\tsubject\tDOAJ subject\tfunding\tlicence\t'        + \
+            'databaseID\tnotes\toaDOI[is_oa]\toaDOI[journal_is_oa]\toaDOI[host_type]\t'    + \
+            'oaDOI[license]\tAPC Amount\tAPC Currency'
+            
+            filename = output_dir + '/' + db.name.replace(' ', '_') + '.txt'
+            
+            np.savetxt(filename, [item.arry() for item in db.content],
+                       delimiter='\t', header = ch, comments = '', fmt='"%s"')
 
+        np.savetxt(output_dir + '/allPub_normalized_before_deduplication.txt', [item.arry() for item in allPubs_temp],
+                   delimiter='\t', header = ch, comments = '', fmt='"%s"')
+        
+        print 'Data exported to directory "' + output_dir + '"'    
+            
+    except OSError:
+        print ('Error: Creating directory. ' +  directory)
+
+    finally:
+        # delete variable to clear memory
+        del allPubs_temp
+
+
+        
 # ----------------------- 5. Duplicate Check ----------------------------------
 
 # Calls the function 'dubletten' above and prints statistics or reads in data
@@ -955,13 +1210,15 @@ for item in finalList:
     if len(item.authors) > 2500:
         item.authors = item.authors[0:2500] + \
         '... [List shortened due to excessive length]'
-    if len(item.affiliations) > 2500:
+    if item.affiliations and len(item.affiliations) > 2500:
         item.affiliations = item.affiliations[0:2500] + \
         '... [List shortened due to excessive length]'
 
 # Make some adjustments to EBSCO data. These are due to several metadata-
 # schemes being present in the data. This approach is suboptimal and shoud
 # be cleaned up and rewritten
+
+# TO DO: Serious Bug, sometimes a char gets cut off the end of the corrAuth field where it should not
 for item in finalList:
     if item.dbID == 13 and item.corrAuth is not None:
         if item.corrAuth[0:2] == '; ':
@@ -999,7 +1256,18 @@ for item in finalList:
 # Add information about the subject, publisher and journal licence
 doaj = np.loadtxt('input-files/doaj.txt', dtype='string', comments='$#',
                   skiprows=1, delimiter='\t',
-                  usecols=(3, 4, 0, 56, 11, 12, 5, 44, 29))
+                  usecols=(
+                      3,    # Journal ISSN (print version)
+                      4,    # Journal EISSN (online version)
+                      0,    # Journal title
+                      54,   # Subjects
+                      11,   # APC amount
+                      12,   # Currency
+                      5,    # Publisher
+                      42,   # Journal license
+                      27    # First calendar year journal provided online Open Access content
+                  )
+                 )
 print 'Finished reading in DOAJ data'
 issns = collections.Counter(doaj[:, 0])
 eissns = collections.Counter(doaj[:, 1])
