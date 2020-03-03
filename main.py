@@ -1199,7 +1199,7 @@ print 'Removed an additional ', len(doubles), ' records due to them being ',\
 # Remove articles which were published before or after the time period that is
 # of interest to you
 l1 = len(finalList)
-finalList = [item for item in finalList if int(item.year) >= yearMin
+finalList = [item for item in finalList if item.year is not '' and int(item.year) >= yearMin
              and int(item.year) <= yearMax]
 l2 = len(finalList)
 print 'Removed ', l1 - l2, ' records that do not fit the specified time frame'
