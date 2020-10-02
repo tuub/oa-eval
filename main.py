@@ -1156,7 +1156,7 @@ if doReadIn:
         print('Data exported to directory "' + output_dir + '"')   
             
     except OSError:
-        print('Error: Creating directory. ' +  directory)
+        print('Error: Creating directory. ' +  output_dir)
 
     finally:
         # delete variable to clear memory
