@@ -65,8 +65,8 @@ contactOaDOI = 1
 checkToDo = 1
 
 # Clarify which years of publication are of interest to you
-yearMin = 2018
-yearMax = 2018
+yearMin = 2019
+yearMax = 2019
 
 # Enter your email here. It's needed to contact Unpaywall
 myEMail = 'oabb@open-access-berlin.de'
@@ -971,7 +971,7 @@ dbNameID = {datenbanken[i].idNummer: datenbanken[i].name for i in range(leDat)}
 if doReadIn:
     # Read in the 'Web of Science' file and extract the relevant information.
     contentWoS = []
-    with open('input-files/wos2018.txt') as f:
+    with open('input-files/wos2019.txt') as f:
         ic = 0
         for line in f:
             fields = line.split('\t')
@@ -1001,7 +1001,7 @@ if doReadIn:
  
     # Read in the 'SciFinder' files and extract the relevant information.
     contentSF = []
-    with open('input-files/sf2018.txt', 'r', newline=None) as f:
+    with open('input-files/sf2019.txt', 'r', newline=None) as f:
         ic = 0
         for line in f:
             fields = line.split('\t')
@@ -1033,16 +1033,16 @@ if doReadIn:
     print('Finished reading in SciFinder')
  
     # Read in 'PubMed' file and extract relevant information.
-    dbPM.content = pubmedFormat('input-files/pubmed2018.txt', dbPM.idNummer)
+    dbPM.content = pubmedFormat('input-files/pubmed2019.txt', dbPM.idNummer)
     print('Finished reading in PubMed')
  
     # Read in 'Scopus' file and extract relevant information.
-    dbScopus.content = risFormat('input-files/scopus2018.ris', dbScopus.idNummer)
+    dbScopus.content = risFormat('input-files/scopus2019.ris', dbScopus.idNummer)
     print('Finished reading in Scopus')
  
     # Read in 'Inpsec' file and extract relevant information.
     contentInspec = []
-    with open('input-files/inspec2018.txt') as f:
+    with open('input-files/inspec2019.txt') as f:
         ic = 0
         for line in f:
             fields = line.split('\t')
@@ -1071,47 +1071,47 @@ if doReadIn:
     print('Finished reading in Inspec')
  
     # Read in 'TEMA' file and extract relevant information.
-    dbTEMA.content = risFormat('input-files/tema2018.ris', dbTEMA.idNummer)
+    dbTEMA.content = risFormat('input-files/tema2019.ris', dbTEMA.idNummer)
     print('Finished reading in TEMA')
  
     # Read in 'ProQuest' file and extract relevant information.
-    dbPQ.content = risFormat('input-files/pq2018.ris', dbPQ.idNummer)
+    dbPQ.content = risFormat('input-files/pq2019.ris', dbPQ.idNummer)
     print('Finished reading in ProQuest')
  
     # Read in 'Business Source Complete' file and extract relevant information.
-    dbBSC.content = risFormat('input-files/bsc2018.ris', dbBSC.idNummer)
+    dbBSC.content = risFormat('input-files/bsc2019.ris', dbBSC.idNummer)
     print('Finished reading in Business Source Complete')
  
     # Read in 'GeoRef' file and extract relevant information.
-    dbGf.content = risFormat('input-files/gf2018.ris', dbGf.idNummer)
+    dbGf.content = risFormat('input-files/gf2019.ris', dbGf.idNummer)
     print('Finished reading in GeoRef')
  
     # Read in 'CINAHL' file and extract relevant information.
-    dbCIN.content = risFormat('input-files/cinahl2018.ris', dbCIN.idNummer)
+    dbCIN.content = risFormat('input-files/cinahl2019.ris', dbCIN.idNummer)
     print('Finished reading in CINAHL')
  
     # Read in 'LISA' file and extract relevant information.
-    dbLisa.content = risFormat('input-files/lisa2018.ris', dbLisa.idNummer)
+    dbLisa.content = risFormat('input-files/lisa2019.ris', dbLisa.idNummer)
     print('Finished reading in LISA')
  
     # Read in 'CAB Abstracts' file and extract relevant information.
-    dbCAB.content = risFormat('input-files/cab2018.ris', dbCAB.idNummer)
+    dbCAB.content = risFormat('input-files/cab2019.ris', dbCAB.idNummer)
     print('Finished reading in CAB Abstracts')
  
     # Read in 'Embase' file and extract relevant information.
-    dbEm.content = risFormat('input-files/embase2018.ris', dbEm.idNummer)
+    dbEm.content = risFormat('input-files/embase2019.ris', dbEm.idNummer)
     print('Finished reading in Embase')
  
     # Read in 'SportDiscus' file and extract relevant information.
-    dbSD.content = risFormat('input-files/sd2018.ris', dbSD.idNummer)
+    dbSD.content = risFormat('input-files/sd2019.ris', dbSD.idNummer)
     print('Finished reading in Sport Discus')
  
     # Read in 'IEEE' file and extract relevant information.
-    dbIEEE.content = risFormat('input-files/ieee2018.ris', dbIEEE.idNummer)
+    dbIEEE.content = risFormat('input-files/ieee2019.ris', dbIEEE.idNummer)
     print('Finished reading in IEEE')
 
     # Read in 'EBSCO' file and extract relevant information.
-    dbEB.content = risFormat('input-files/ebsco2018.ris', dbEB.idNummer)
+    dbEB.content = risFormat('input-files/ebsco2019.ris', dbEB.idNummer)
     print('Finished reading in EBSCO')
 
 # do not set up a new database below this line!
