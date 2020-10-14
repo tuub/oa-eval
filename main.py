@@ -1221,7 +1221,10 @@ for item in finalList:
 # schemes being present in the data. This approach is suboptimal and shoud
 # be cleaned up and rewritten
 
+# TO DO: Documentation 
+
 # TO DO: Serious Bug, sometimes a char gets cut off the end of the corrAuth field where it should not
+# MH: Bugfix, may need to be verified
 for item in finalList:
     if item.dbID == 13 and item.corrAuth is not None:
         if item.corrAuth[0:2] == '; ':
@@ -1235,7 +1238,8 @@ for item in finalList:
                 auto = True
         if all(g) and len(g) > 1:
             h = item.corrAuth.find(item.authors.split('; ')[1])
-            setattr(item, 'corrAuth', getattr(item, 'corrAuth')[:h])
+            if h != -1:
+                setattr(item, 'corrAuth', getattr(item, 'corrAuth')[:h])
 
 
 # ------------ 6. Identify Affiliations of Corresponding Authors --------------
