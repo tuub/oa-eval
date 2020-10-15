@@ -40,14 +40,14 @@ doReadIn = True
 # 1: Contact the CrossRef API to add missing ISSNs. Write results to file.
 # 2: Read results from previously created file instead
 # 0: Disable this feature
-contactCR = 1
+contactCR = 0
 
 # Variable that determines whether to contact Unpaywall in order to retrieve
 # data on green and hybrid OA. Possible values:
 # 1: Contact the Unpaywall-API to retrieve OA-article-data. Write results to file.
 # 2: Read results from previously created file instead
 # 0: Disable this feature
-contactOaDOI = 1
+contactOaDOI = 0
 
 # Decide what to do when a corresponding/first author of a publication can't be
 # determined manually. Possible values:
@@ -91,6 +91,37 @@ class Database(object):
         self.__class__.instancesdb.append(weakref.proxy(self))
         self.name = name
         self.idNummer = idNummer
+
+
+def save_publications_data_to_file(document_list, filename_out):
+    print('save data to ' + filename_out)
+    
+    if os.path.exists(filename_out):
+        os.remove(filename_out) 
+    
+    with open(filename_out, 'w', encoding='utf-8') as f:
+        
+        ch = 'authors\ttitle\tOA-Status\tDOI\tjournal\tISSN\teISSN\tpublisher\tyear\t'  + \
+            'affiliations\tall identified name variants\tcorresponding author\t'        + \
+            'found name variant\te-mail\tsubject\tDOAJ subject\tfunding\tlicence\t'     + \
+            'databaseID\tnotes\toaDOI[is_oa]\toaDOI[journal_is_oa]\toaDOI[host_type]\t' + \
+            'oaDOI[license]\tAPC Amount\tAPC Currency'
+
+        f.write(ch + '\n')
+
+        for d in document_list:
+            document_data = []
+            for i in d.arry():
+                if i is None:
+                    result_string = 'None' 
+                else:
+                    result_string = re.sub('[\t\n\r]', ' ', str(i).strip())
+                
+                document_data.append(result_string)
+            
+            f.write('\t'.join(document_data))
+            f.write('\n')
+        
 
 # Set up class for documents
 class Document(object):
@@ -1136,23 +1167,12 @@ if doReadIn:
             Save normalized publication data to a tab-seperated file 
             (one line per publication)
             '''
-            
+            save_publications_data_to_file(allPubs_temp, output_dir + '/' + db.name.replace(' ', '_') + '.txt')
+
             allPubs_temp += db.content
             
-            ch = 'authors\ttitle\tOA-Status\tDOI\tjournal\tISSN\teISSN\tpublisher\tyear\t' + \
-            'affiliations\tall identified name variants\tcorresponding author\t'           + \
-            'found name variant\te-mail\tsubject\tDOAJ subject\tfunding\tlicence\t'        + \
-            'databaseID\tnotes\toaDOI[is_oa]\toaDOI[journal_is_oa]\toaDOI[host_type]\t'    + \
-            'oaDOI[license]\tAPC Amount\tAPC Currency'
-            
-            filename = output_dir + '/' + db.name.replace(' ', '_') + '.txt'
-            
-            np.savetxt(filename, [item.arry() for item in db.content],
-                       delimiter='\t', header = ch, comments = '', fmt='"%s"')
+        save_publications_data_to_file(allPubs_temp, output_dir + '/allPub_normalized_before_deduplication.txt')
 
-        np.savetxt(output_dir + '/allPub_normalized_before_deduplication.txt', [item.arry() for item in allPubs_temp],
-                   delimiter='\t', header = ch, comments = '', fmt='"%s"')
-        
         print('Data exported to directory "' + output_dir + '"')   
             
     except OSError:
@@ -1422,9 +1442,7 @@ for h in range(len(allCurrencies)):
     print(APCAmounts[h][0], '\t', APCAmounts[h][1], '\n')
 
 # Save results to file
-np.savetxt('output-files/allPubs.txt', [item.arry() for item in finalList],
-           delimiter='\t', header=ch, comments='', fmt='"%s"')
-
+save_publications_data_to_file(finalList, 'output-files/allPubs.txt')
 
 # ------------------------- 12. Basic Statistics ------------------------------
 
