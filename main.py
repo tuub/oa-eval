@@ -1167,7 +1167,7 @@ if doReadIn:
             Save normalized publication data to a tab-seperated file 
             (one line per publication)
             '''
-            save_publications_data_to_file(allPubs_temp, output_dir + '/' + db.name.replace(' ', '_') + '.txt')
+            save_publications_data_to_file(db.content, output_dir + '/' + db.name.replace(' ', '_') + '.txt')
 
             allPubs_temp += db.content
             
