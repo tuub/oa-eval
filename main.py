@@ -40,14 +40,14 @@ doReadIn = True
 # 1: Contact the CrossRef API to add missing ISSNs. Write results to file.
 # 2: Read results from previously created file instead
 # 0: Disable this feature
-contactCR = 0
+contactCR = 1
 
 # Variable that determines whether to contact Unpaywall in order to retrieve
 # data on green and hybrid OA. Possible values:
 # 1: Contact the Unpaywall-API to retrieve OA-article-data. Write results to file.
 # 2: Read results from previously created file instead
 # 0: Disable this feature
-contactOaDOI = 0
+contactOaDOI = 1
 
 # Decide what to do when a corresponding/first author of a publication can't be
 # determined manually. Possible values:
